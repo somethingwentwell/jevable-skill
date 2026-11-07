@@ -12,9 +12,9 @@ YAML defines the workflow. HTML lets you inspect it. The deliverable is an entir
 
 Paste this into your agent (any agent that can use skills and run Node.js):
 
-> Install the Jevable skill from its trusted ZIP: verify the archive hash, extract it into your approved skill location, then use the skill to run the shipped echo example — no npm install, no Docker, no model account. Show me the run ID and its retained result.
+> Install the Jevable skill from its public repository: clone https://github.com/somethingwentwell/jevable-skill, install the skill from that checkout into your approved skill location, then use the skill to run the shipped echo example — no npm install, no Docker, no model account. Show me the run ID and its retained result.
 
-Your agent verifies and extracts the skill, runs the example, and reports the **saved run**. Requires **Node.js 22.19+** only. There is no public installer/download yet; manual installation and archive inspection live in the [skill package guide](references/skill-package.md), and your agent can walk them for you.
+Your agent clones the repository (it ships prebuilt output — no build step), installs the skill, runs the example, and reports the **saved run**. Requires **git and Node.js 22.19+** only. Packaging the same skill as a verified ZIP and archive inspection remain available in the [skill package guide](references/skill-package.md), and your agent can walk them for you.
 
 ### Try a real branch and approval wait — also a prompt
 
