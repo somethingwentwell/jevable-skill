@@ -1,0 +1,68 @@
+# Compiler example only. The workspace connection requires a runtime adapter.
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: support
+  name: Support reply
+spec:
+  inputSchema:
+    type: object
+    required: [message]
+    additionalProperties: false
+    properties:
+      message:
+        type: string
+        minLength: 1
+        maxLength: 4096
+  nodes:
+    start:
+      type: trigger
+      config:
+        modes: [manual, chat]
+    check:
+      type: rule
+      config:
+        mode: ifElse
+        condition: '${{ inputs.message != "skip" }}'
+    draft:
+      type: llm
+      config:
+        description: Draft a reply to the supplied message.
+        provider: deepseek
+        model: configured-model
+        connection:
+          mode: workspace
+          id: team-model
+        prompt: 'Reply to ${{ nodes.start.output.message }}'
+        responseFormat: json-schema
+        outputSchema:
+          type: object
+          required: [reply]
+          additionalProperties: false
+          properties:
+            reply:
+              type: string
+              maxLength: 4096
+        generation:
+          maxTokens: 1000
+          stream: false
+        execution:
+          timeoutSeconds: 60
+          maxAttempts: 1
+        historyScope: none
+    result:
+      type: output
+      config:
+        value: '${{ nodes.draft.output.reply }}'
+        outputSchema:
+          type: string
+          maxLength: 4096
+    skipped:
+      type: output
+      config:
+        value: Skipped
+  edges:
+    - {from: start, to: check}
+    - {from: check, port: 'true', to: draft}
+    - {from: check, port: 'false', to: skipped}
+    - {from: draft, to: result}

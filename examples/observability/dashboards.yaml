@@ -1,0 +1,12 @@
+apiVersion: 1
+providers:
+  - name: Jevable workflow runtime
+    orgId: 1
+    folder: Jevable
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    updateIntervalSeconds: 15
+    options:
+      path: /jevable-observability/dashboards
+      foldersFromFilesStructure: false

@@ -1,0 +1,84 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: reply-assistant
+  name: Reply assistant
+extensions:
+  jevable.ai/import:
+    format: n8n
+    fidelity: unsupported
+    sourceSha256: 232606355862ac21ad52cb3e9fade25ae2cc300b3ac7c22107c33d243017f876
+spec:
+  inputSchema:
+    type: object
+    properties:
+      message:
+        type: string
+      customer:
+        type: object
+        properties:
+          name:
+            type: string
+        required:
+          - name
+    required:
+      - message
+      - customer
+  nodes:
+    Webhook:
+      type: trigger
+      config:
+        modes:
+          - manual
+      title: Webhook
+    Write_reply:
+      type: llm
+      config:
+        provider: choose-provider
+        model: choose-model
+        connection:
+          mode: workspace
+          id: choose-an-allowed-model
+        prompt: Reply politely to ${{ inputs.message }} from ${{ inputs.customer.name }}
+        responseFormat: text
+        generation:
+          maxTokens: 1024
+          stream: true
+        historyScope: none
+        execution:
+          timeoutSeconds: 60
+          maxAttempts: 1
+      title: Write reply
+    Format:
+      type: custom
+      config:
+        language: javascript
+        code: return items
+        input: ${{ nodes.Write_reply.output }}
+        outputSchema:
+          type: object
+      title: Format
+    Send_email:
+      type: custom
+      description: Imported from n8n node type n8n-nodes-base.gmail; convert it by hand.
+      config:
+        language: javascript
+        code: ""
+        input: {}
+        outputSchema:
+          type: object
+      title: Send email
+    Send_email_result:
+      type: output
+      title: Result
+      config:
+        value: ${{ nodes.Send_email.output }}
+  edges:
+    - from: Webhook
+      to: Write_reply
+    - from: Write_reply
+      to: Format
+    - from: Format
+      to: Send_email
+    - from: Send_email
+      to: Send_email_result

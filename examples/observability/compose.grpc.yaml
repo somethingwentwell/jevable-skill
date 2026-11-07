@@ -1,0 +1,6 @@
+# Optional override: docker compose -f compose.yaml -f compose.grpc.yaml ...
+# Adds only host-loopback gRPC publication; existing HTTP/Grafana ports stay unchanged.
+services:
+  observability:
+    ports:
+      - "127.0.0.1:${JEVABLE_OTLP_GRPC_PORT:-4317}:4317"

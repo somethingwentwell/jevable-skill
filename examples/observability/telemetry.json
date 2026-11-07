@@ -1,0 +1,13 @@
+{
+  "endpoint": "http://127.0.0.1:4318/v1/traces",
+  "metricsEndpoint": "http://127.0.0.1:4318/v1/metrics",
+  "logsEndpoint": "http://127.0.0.1:4318/v1/logs",
+  "authentication": { "kind": "none" },
+  "serviceName": "jevable-workflow-runtime",
+  "environment": "local",
+  "httpRequests": true,
+  "exporterMetrics": true,
+  "retainedStateMetrics": true,
+  "intervalMs": 1000,
+  "sampleRatio": 1
+}

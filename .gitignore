@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Local runtime state (never commit journals, tokens or author identity)
+.jevable/
+.qualification/
+.kube/
+artifacts/
+qualification/
+
+# Secrets / credentials — never commit
+.env
+.env.*
+!.env.example
+*.token
+*.tok
+*.secret
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*.kubeconfig
+kubeconfig*
+gh-*.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs & temp
+*.log
+logs/
+tmp/
+.temp/
+
+# Local collaboration / planning notes (kept out of the public repo)
+todo.md
+plan.md
+HANDOFF.md

@@ -1,0 +1,73 @@
+# Optional local development backend, not a workflow-runtime dependency or production deployment.
+services:
+  observability:
+    # Grafana LGTM v0.34.0 multi-platform index; qualification records pin the tested platform too.
+    image: grafana/otel-lgtm@sha256:b966ea107831d526d9eb8fe4d2d86c9e5731392fad9dce8296bcf2072031f07c
+    pull_policy: never
+    ports:
+      - "127.0.0.1:${JEVABLE_GRAFANA_PORT:-3000}:3000"
+      - "127.0.0.1:${JEVABLE_OTLP_PORT:-4318}:4318"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+      # v0.34.0 has no MCP-bootstrap opt-out. Keep its default-password requests
+      # away from Grafana: repeated startup attempts can trigger login protection.
+      # This is only run-all.sh's optional bootstrap URL, not Grafana's listener.
+      GRAFANA_URL: http://127.0.0.1:1
+      ENABLE_LOGS_GRAFANA: "true"
+      ENABLE_OBI: "false"
+      LGTM_SHUTDOWN_TIMEOUT_SECONDS: "30"
+      PROMETHEUS_EXTRA_ARGS: --storage.tsdb.retention.time=3d --storage.tsdb.retention.size=512MB
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    # Read the explicitly mounted owner-only password file; no host directories or Docker socket.
+    cap_add: [DAC_OVERRIDE]
+    mem_limit: 4g
+    cpus: 2
+    pids_limit: 512
+    stop_grace_period: 45s
+    networks: [private]
+    secrets: [grafana_admin_password]
+    volumes:
+      - data:/data
+      - type: bind
+        source: ./grafana.ini
+        # LGTM launches the Grafana binary directly, not the official Docker entrypoint.
+        target: /otel-lgtm/grafana/conf/custom.ini
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ./otelcol.yaml
+        target: /otel-lgtm/otelcol-config.yaml
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ./prometheus.yaml
+        target: /otel-lgtm/prometheus.yaml
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ./alerts.yaml
+        target: /jevable-observability/alerts.yaml
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ./dashboards.yaml
+        target: /otel-lgtm/grafana/conf/provisioning/dashboards/jevable.yaml
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ./workflow-runtime.json
+        target: /jevable-observability/dashboards/workflow-runtime.json
+        read_only: true
+        bind: {create_host_path: false}
+secrets:
+  grafana_admin_password:
+    file: ${JEVABLE_OBSERVABILITY_PASSWORD_FILE:?Set an absolute path to a fresh private Grafana password file}
+volumes:
+  data:
+networks:
+  private:
+    # Internal-only bridges do not publish host ports on the qualified Docker engine.
+    # Inbound publication is loopback-only; outbound traffic is not firewalled here.
+    driver: bridge

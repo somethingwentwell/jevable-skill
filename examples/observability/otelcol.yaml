@@ -1,0 +1,55 @@
+# Local private-network receiver only. Do not expose this unauthenticated endpoint remotely.
+receivers:
+  otlp:
+    protocols:
+      # Container-network only unless compose.grpc.yaml is explicitly selected.
+      grpc:
+        endpoint: 0.0.0.0:4317
+        max_recv_msg_size_mib: 4
+      http:
+        endpoint: 0.0.0.0:4318
+        max_request_body_size: 4194304
+extensions:
+  health_check:
+    endpoint: 127.0.0.1:13133
+    path: /ready
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+    spike_limit_mib: 64
+  batch:
+    timeout: 1s
+    send_batch_size: 256
+    send_batch_max_size: 512
+exporters:
+  otlp_http/metrics:
+    endpoint: http://127.0.0.1:9090/api/v1/otlp
+    timeout: 5s
+    sending_queue: {queue_size: 128}
+    retry_on_failure: {enabled: true, max_elapsed_time: 30s}
+  otlp_http/traces:
+    endpoint: http://127.0.0.1:4418
+    timeout: 5s
+    sending_queue: {queue_size: 128}
+    retry_on_failure: {enabled: true, max_elapsed_time: 30s}
+  otlp_http/logs:
+    endpoint: http://127.0.0.1:3100/otlp
+    timeout: 5s
+    sending_queue: {queue_size: 128}
+    retry_on_failure: {enabled: true, max_elapsed_time: 30s}
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/traces]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/metrics]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/logs]

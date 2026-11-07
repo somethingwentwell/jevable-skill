@@ -1,0 +1,50 @@
+app: { name: Summarize topics, mode: workflow }
+version: 0.2.0
+workflow:
+  graph:
+    nodes:
+      - id: start
+        data: { type: start, title: Start, variables: [{ variable: text, type: paragraph, required: true }] }
+      - id: split
+        data:
+          type: code
+          title: Split topics
+          code_language: javascript
+          code: 'function main({ text }) { return { topics: text.split(",") } }'
+          variables: [{ variable: text, value_selector: [start, text] }]
+      - id: each
+        data: { type: iteration, title: Each topic, iterator_selector: [split, topics], output_selector: [write, text], start_node_id: each-start }
+      - id: each-start
+        parentId: each
+        data: { type: iteration-start }
+      - id: check
+        parentId: each
+        data:
+          type: if-else
+          title: Long topic
+          cases: [{ case_id: long, conditions: [{ variable_selector: [each, index], comparison_operator: '>', value: '2' }] }]
+      - id: write
+        parentId: each
+        data:
+          type: llm
+          title: Write summary
+          prompt_template: [{ role: user, text: 'Summarize {{#each.item#}} (topic {{#each.index#}})' }]
+      - id: tidy
+        parentId: each
+        data: { type: code, code_language: javascript, code: 'function main({ s }) { return { s } }', variables: [{ variable: s, value_selector: [each, first] }] }
+      - id: extra
+        parentId: each
+        data: { type: http-request, title: Notify }
+      - id: done
+        data: { type: end, title: Summaries, outputs: [{ variable: summaries, value_selector: [each, output] }] }
+      - id: broken
+        data: { type: iteration, title: Broken loop, iterator_selector: [nowhere, x], output_selector: [write, text] }
+    edges:
+      - { source: start, target: split }
+      - { source: split, target: each }
+      - { source: each-start, target: check }
+      - { source: check, target: write, sourceHandle: long }
+      - { source: write, target: tidy }
+      - { source: write, target: extra }
+      - { source: each, target: done }
+      - { source: done, target: broken }

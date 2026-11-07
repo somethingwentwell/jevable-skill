@@ -1,0 +1,35 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: nested-input
+  name: Review details
+spec:
+  inputSchema:
+    type: object
+    additionalProperties: false
+    required: [ticket, tags]
+    properties:
+      ticket:
+        type: object
+        additionalProperties: false
+        required: [message, priority]
+        properties:
+          message: {type: string, minLength: 1, maxLength: 500}
+          priority: {type: string, enum: [low, high]}
+          owner: {type: string}
+      tags:
+        type: array
+        minItems: 1
+        maxItems: 2
+        items: {type: string, minLength: 1}
+      active: {type: boolean}
+  nodes:
+    start:
+      type: trigger
+      config: {modes: [manual]}
+    result:
+      type: output
+      config:
+        value: "${{ inputs }}"
+  edges:
+    - {from: start, to: result}

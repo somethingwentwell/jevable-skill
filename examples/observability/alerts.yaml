@@ -1,0 +1,53 @@
+# Demonstration thresholds, not production SLOs. No notification destination is configured.
+groups:
+  - name: jevable-workflow-runtime
+    interval: 5s
+    rules:
+      - record: jevable:retained_available:fresh
+        expr: (jevable_retained_available == 1) and (time() - timestamp(jevable_retained_available) < 30)
+      - alert: JevableTelemetryMissing
+        expr: absent_over_time(jevable_retained_available{service_name="jevable-workflow-runtime",deployment_environment_name="local"}[2m])
+        for: 30s
+        labels: {severity: warning}
+        annotations:
+          summary: Expected local Jevable telemetry is missing
+          description: Check the explicitly expected service/environment, runtime, collector and receiver. Absence is unknown, not zero workload. Do not replay workflows.
+      - alert: JevableRetainedStateUnavailable
+        expr: (jevable_retained_available == 0) and (time() - timestamp(jevable_retained_available) < 30)
+        for: 30s
+        labels: {severity: warning}
+        annotations:
+          summary: Retained-state projection is unavailable
+          description: Inspect owner/storage health and retained evidence. Do not interpret missing backlog gauges as empty or repair storage automatically.
+      - alert: JevableTelemetryLoss
+        expr: sum by (service_name, service_instance_id, deployment_environment_name, jevable_telemetry_signal) (increase(jevable_telemetry_records{jevable_telemetry_state=~"dropped|rejected"}[5m])) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: Jevable reports dropped or rejected diagnostic data
+          description: Check receiver health and queue pressure. This counter may arrive only after recovery; export loss never authorizes workflow replay.
+      - alert: JevableApprovalPastDeadline
+        expr: (jevable_retained_approvals{jevable_retained_state="expired"} > 0) and on (service_name, service_instance_id, deployment_environment_name) jevable:retained_available:fresh
+        for: 30s
+        labels: {severity: warning}
+        annotations:
+          summary: An unsettled approval is past its deadline
+          description: Inspect the pinned run and request. Sampling does not expire, approve, reject or resume it.
+      - alert: JevableApprovalAge
+        expr: (jevable_retained_approval_oldest_age > 900) and on (service_name, service_instance_id, deployment_environment_name) jevable:retained_available:fresh
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: Approval age exceeds the demo threshold
+          description: Review this illustrative 15-minute threshold against your process. Age includes runtime downtime; this alert is not approval authority.
+      - alert: JevableExecutionFailure
+        expr: sum by (service_name, service_instance_id, deployment_environment_name) (increase(jevable_execution_segments{jevable_outcome=~"failed|failed-or-uncertain|commit-or-execution-failed"}[5m])) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: A failed or uncertain execution segment was observed
+          description: Inspect the journal using retained identities. Segment totals are not unique failed runs; never automatically retry an uncertain action.
+      - alert: JevableHttpServerError
+        expr: sum by (service_name, service_instance_id, deployment_environment_name) (increase(jevable_http_requests{jevable_http_status_class="5xx"}[5m])) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: The Jevable API reported a server error
+          description: Inspect HTTP and execution evidence separately. An error or disconnect does not prove that a mutation did not commit.

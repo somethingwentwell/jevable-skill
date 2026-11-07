@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jevable"
+  short_description: "Build, preview and ship runnable workflow apps"
+  default_prompt: "Use $jevable to build a runnable workflow app and open its live preview beside this chat when supported, so I can review it before running a test."

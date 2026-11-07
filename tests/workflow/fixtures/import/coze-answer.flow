@@ -1,0 +1,470 @@
+{
+  "type": "coze-workflow-export-data",
+  "source": {
+    "workflowId": "7000000000000000001",
+    "flowMode": 0,
+    "spaceId": "7000000000000000009",
+    "host": "localhost:8888",
+    "isDouyin": false
+  },
+  "json": {
+    "nodes": [
+      {
+        "id": "100001",
+        "type": "1",
+        "meta": {
+          "position": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        "data": {
+          "nodeMeta": {
+            "title": "Start",
+            "description": "",
+            "icon": "",
+            "subTitle": ""
+          },
+          "outputs": [
+            {
+              "name": "question",
+              "type": "string",
+              "required": true,
+              "description": "User question"
+            },
+            {
+              "name": "strict",
+              "type": "boolean",
+              "required": false,
+              "defaultValue": "false"
+            }
+          ],
+          "trigger_parameters": []
+        },
+        "_temp": {
+          "bounds": {
+            "x": -180,
+            "y": 0,
+            "width": 360,
+            "height": 110
+          }
+        }
+      },
+      {
+        "id": "110201",
+        "type": "3",
+        "meta": {
+          "position": {
+            "x": 450,
+            "y": 0
+          }
+        },
+        "data": {
+          "nodeMeta": {
+            "title": "Answer",
+            "description": "",
+            "icon": "",
+            "subTitle": ""
+          },
+          "inputs": {
+            "inputParameters": [
+              {
+                "name": "q",
+                "input": {
+                  "type": "string",
+                  "value": {
+                    "type": "ref",
+                    "content": {
+                      "source": "block-output",
+                      "blockID": "100001",
+                      "name": "question"
+                    },
+                    "rawMeta": {
+                      "type": 1
+                    }
+                  }
+                }
+              }
+            ],
+            "llmParam": [
+              {
+                "name": "modleName",
+                "input": {
+                  "type": "string",
+                  "value": {
+                    "type": "literal",
+                    "content": "demo-model"
+                  }
+                }
+              },
+              {
+                "name": "modelType",
+                "input": {
+                  "type": "integer",
+                  "value": {
+                    "type": "literal",
+                    "content": "1001"
+                  }
+                }
+              },
+              {
+                "name": "temperature",
+                "input": {
+                  "type": "float",
+                  "value": {
+                    "type": "literal",
+                    "content": "0.3"
+                  }
+                }
+              },
+              {
+                "name": "maxTokens",
+                "input": {
+                  "type": "integer",
+                  "value": {
+                    "type": "literal",
+                    "content": "1024"
+                  }
+                }
+              },
+              {
+                "name": "responseFormat",
+                "input": {
+                  "type": "integer",
+                  "value": {
+                    "type": "literal",
+                    "content": "0"
+                  }
+                }
+              },
+              {
+                "name": "systemPrompt",
+                "input": {
+                  "type": "string",
+                  "value": {
+                    "type": "literal",
+                    "content": "Answer briefly."
+                  }
+                }
+              },
+              {
+                "name": "prompt",
+                "input": {
+                  "type": "string",
+                  "value": {
+                    "type": "literal",
+                    "content": "Question: {{q}}"
+                  }
+                }
+              },
+              {
+                "name": "enableChatHistory",
+                "input": {
+                  "type": "boolean",
+                  "value": {
+                    "type": "literal",
+                    "content": false
+                  }
+                }
+              },
+              {
+                "name": "chatHistoryRound",
+                "input": {
+                  "type": "integer",
+                  "value": {
+                    "type": "literal",
+                    "content": "3"
+                  }
+                }
+              }
+            ],
+            "settingOnError": {
+              "switch": false,
+              "processType": 1,
+              "timeoutMs": 600000,
+              "retryTimes": 0
+            }
+          },
+          "outputs": [
+            {
+              "name": "output",
+              "type": "string"
+            }
+          ],
+          "version": "3"
+        },
+        "_temp": {
+          "bounds": {
+            "x": 270,
+            "y": 0,
+            "width": 360,
+            "height": 160
+          }
+        }
+      },
+      {
+        "id": "120301",
+        "type": "8",
+        "meta": {
+          "position": {
+            "x": 900,
+            "y": 0
+          }
+        },
+        "data": {
+          "nodeMeta": {
+            "title": "Is empty?",
+            "description": "",
+            "icon": "",
+            "subTitle": ""
+          },
+          "inputs": {
+            "branches": [
+              {
+                "condition": {
+                  "logic": 2,
+                  "conditions": [
+                    {
+                      "operator": 9,
+                      "left": {
+                        "input": {
+                          "type": "string",
+                          "value": {
+                            "type": "ref",
+                            "content": {
+                              "source": "block-output",
+                              "blockID": "110201",
+                              "name": "output"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "condition": {
+                  "logic": 1,
+                  "conditions": [
+                    {
+                      "operator": 7,
+                      "left": {
+                        "input": {
+                          "type": "string",
+                          "value": {
+                            "type": "ref",
+                            "content": {
+                              "source": "block-output",
+                              "blockID": "110201",
+                              "name": "output"
+                            }
+                          }
+                        }
+                      },
+                      "right": {
+                        "input": {
+                          "type": "string",
+                          "value": {
+                            "type": "literal",
+                            "content": "sorry"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "operator": 11,
+                      "left": {
+                        "input": {
+                          "type": "boolean",
+                          "value": {
+                            "type": "ref",
+                            "content": {
+                              "source": "block-output",
+                              "blockID": "100001",
+                              "name": "strict"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "_temp": {
+          "bounds": {
+            "x": 720,
+            "y": 0,
+            "width": 360,
+            "height": 180
+          }
+        }
+      },
+      {
+        "id": "130401",
+        "type": "15",
+        "meta": {
+          "position": {
+            "x": 1350,
+            "y": 120
+          }
+        },
+        "data": {
+          "nodeMeta": {
+            "title": "Format",
+            "description": "",
+            "icon": "",
+            "subTitle": ""
+          },
+          "inputs": {
+            "method": "concat",
+            "inputParameters": [
+              {
+                "name": "a",
+                "input": {
+                  "type": "string",
+                  "value": {
+                    "type": "ref",
+                    "content": {
+                      "source": "block-output",
+                      "blockID": "110201",
+                      "name": "output"
+                    }
+                  }
+                }
+              }
+            ],
+            "concatParams": [
+              {
+                "name": "concatResult",
+                "input": {
+                  "type": "string",
+                  "value": {
+                    "type": "literal",
+                    "content": "Answer: {{a}}"
+                  }
+                }
+              },
+              {
+                "name": "arrayItemConcatChar",
+                "input": {
+                  "type": "string",
+                  "value": {
+                    "type": "literal",
+                    "content": ","
+                  }
+                }
+              }
+            ]
+          },
+          "outputs": [
+            {
+              "name": "output",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        "_temp": {
+          "bounds": {
+            "x": 1170,
+            "y": 120,
+            "width": 360,
+            "height": 110
+          }
+        }
+      },
+      {
+        "id": "900001",
+        "type": "2",
+        "meta": {
+          "position": {
+            "x": 1800,
+            "y": 0
+          }
+        },
+        "data": {
+          "nodeMeta": {
+            "title": "End",
+            "description": "",
+            "icon": "",
+            "subTitle": ""
+          },
+          "inputs": {
+            "terminatePlan": "returnVariables",
+            "inputParameters": [
+              {
+                "name": "result",
+                "input": {
+                  "type": "string",
+                  "value": {
+                    "type": "ref",
+                    "content": {
+                      "source": "block-output",
+                      "blockID": "130401",
+                      "name": "output"
+                    }
+                  }
+                }
+              },
+              {
+                "name": "raw",
+                "input": {
+                  "type": "string",
+                  "value": {
+                    "type": "ref",
+                    "content": {
+                      "source": "block-output",
+                      "blockID": "110201",
+                      "name": "output"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "_temp": {
+          "bounds": {
+            "x": 1620,
+            "y": 0,
+            "width": 360,
+            "height": 110
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "sourceNodeID": "100001",
+        "targetNodeID": "110201"
+      },
+      {
+        "sourceNodeID": "110201",
+        "targetNodeID": "120301"
+      },
+      {
+        "sourceNodeID": "120301",
+        "targetNodeID": "900001",
+        "sourcePortID": "true"
+      },
+      {
+        "sourceNodeID": "120301",
+        "targetNodeID": "130401",
+        "sourcePortID": "true_1"
+      },
+      {
+        "sourceNodeID": "120301",
+        "targetNodeID": "130401",
+        "sourcePortID": "false"
+      },
+      {
+        "sourceNodeID": "130401",
+        "targetNodeID": "900001"
+      }
+    ]
+  }
+}

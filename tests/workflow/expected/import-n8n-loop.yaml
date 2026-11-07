@@ -1,0 +1,102 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: review-articles
+  name: Review articles
+extensions:
+  jevable.ai/import:
+    format: n8n
+    fidelity: approximate
+    sourceSha256: 16dbd055d8ac0787af43524cc1297c3bbd0958b0bc403c922cb0b06f6395f132
+spec:
+  inputSchema:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          type: object
+          properties:
+            words:
+              type: number
+            text:
+              type: string
+          required:
+            - words
+            - text
+    required:
+      - items
+  nodes:
+    Start:
+      type: trigger
+      config:
+        modes:
+          - manual
+      title: Start
+    Loop_Over_Items:
+      type: loop
+      config:
+        mode: forEach
+        items: ${{ inputs.items }}
+        maxIterations: 100
+        timeoutSeconds: 600
+        body:
+          entry: Is_long
+          nodes:
+            Is_long:
+              type: rule
+              config:
+                mode: ifElse
+                condition: ${{ loop.item.words > 500 }}
+              title: Is long?
+            Summarize:
+              type: llm
+              config:
+                provider: choose-provider
+                model: choose-model
+                connection:
+                  mode: workspace
+                  id: choose-an-allowed-model
+                prompt: Summarize ${{ loop.item.text }}
+                responseFormat: text
+                generation:
+                  maxTokens: 1024
+                  stream: true
+                historyScope: none
+                execution:
+                  timeoutSeconds: 60
+                  maxAttempts: 1
+              title: Summarize
+          edges:
+            - from: Is_long
+              to: Summarize
+              port: "true"
+          exits:
+            - from: Is_long
+              port: "false"
+              result: ${{ loop.item }}
+            - from: Summarize
+              result: ${{ nodes.Summarize.output }}
+      title: Loop Over Items
+    Report:
+      type: custom
+      config:
+        language: javascript
+        code: return $input.all()
+        input: ${{ nodes.Loop_Over_Items.output }}
+        outputSchema:
+          type: object
+      title: Report
+    Report_result:
+      type: output
+      title: Result
+      config:
+        value: ${{ nodes.Report.output }}
+  edges:
+    - from: Start
+      to: Loop_Over_Items
+    - from: Loop_Over_Items
+      to: Report
+      port: done
+    - from: Report
+      to: Report_result

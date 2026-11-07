@@ -1,0 +1,46 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: first-run-request-review
+  name: Request review
+  description: Return routine requests immediately and hold sensitive requests for a person.
+spec:
+  inputSchema:
+    type: object
+    required: [message, needsReview]
+    additionalProperties: false
+    properties:
+      message: {type: string, minLength: 1, maxLength: 500}
+      needsReview: {type: boolean}
+  nodes:
+    start:
+      type: trigger
+      config: {modes: [manual]}
+    route:
+      type: rule
+      config:
+        mode: ifElse
+        condition: '${{ inputs.needsReview }}'
+    review:
+      type: humanApproval
+      config:
+        title: Review this request
+        input: '${{ inputs.message }}'
+        inputSchema: {type: string, minLength: 1, maxLength: 500}
+        actions: [approve, reject]
+        expiresAfter: 24h
+        onReject: cancelled
+        onTimeout: expired
+    directResult:
+      type: output
+      config:
+        value: '${{ inputs.message }}'
+    reviewedResult:
+      type: output
+      config:
+        value: '${{ inputs.message }}'
+  edges:
+    - {from: start, to: route}
+    - {from: route, port: 'true', to: review}
+    - {from: route, port: 'false', to: directResult}
+    - {from: review, port: approve, to: reviewedResult}

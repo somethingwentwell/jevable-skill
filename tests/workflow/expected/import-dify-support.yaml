@@ -1,0 +1,84 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: support-answer
+  name: Support answer
+extensions:
+  jevable.ai/import:
+    format: dify
+    version: 0.1.5
+    fidelity: approximate
+    sourceSha256: eee6b165be85fff94fadb9ba1bffd256b2c7b875704a3cb987a67e7072f46c9c
+spec:
+  inputSchema:
+    type: object
+    properties:
+      question:
+        type: string
+        maxLength: 500
+      tier:
+        type: string
+        enum:
+          - gold
+          - basic
+      amount:
+        type: number
+    required:
+      - question
+      - tier
+      - amount
+  nodes:
+    Start:
+      type: trigger
+      config:
+        modes:
+          - manual
+      title: Start
+    Gold_customer:
+      type: rule
+      config:
+        mode: ifElse
+        condition: ${{ inputs.tier == "gold" && inputs.amount >= 10 }}
+      title: Gold customer
+    Draft_answer:
+      type: llm
+      config:
+        provider: openai
+        model: gpt-4o-mini
+        connection:
+          mode: workspace
+          id: choose-an-allowed-model
+        prompt: Answer ${{ inputs.question }}
+        systemPrompt: You answer support questions.
+        responseFormat: text
+        generation:
+          maxTokens: 1024
+          stream: true
+        historyScope: none
+        execution:
+          timeoutSeconds: 60
+          maxAttempts: 1
+      title: Draft answer
+    Answer:
+      type: output
+      config:
+        value:
+          answer: ${{ nodes.Draft_answer.output }}
+      title: Answer
+    Standard_reply:
+      type: output
+      config:
+        value:
+          tier: ${{ inputs.tier }}
+      title: Standard reply
+  edges:
+    - from: Start
+      to: Gold_customer
+    - from: Gold_customer
+      to: Draft_answer
+      port: "true"
+    - from: Gold_customer
+      to: Standard_reply
+      port: "false"
+    - from: Draft_answer
+      to: Answer

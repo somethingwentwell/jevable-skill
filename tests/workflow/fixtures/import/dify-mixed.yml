@@ -1,0 +1,35 @@
+app: { name: '', mode: workflow }
+version: 0.3.0
+workflow:
+  graph:
+    nodes:
+      - id: s
+        data:
+          type: start
+          variables: [{ variable: upload, type: file-list }, 'bad']
+      - id: c
+        data: { type: if-else, title: Many cases, cases: [{ case_id: a, conditions: [] }, { case_id: b, conditions: [] }] }
+      - id: j
+        data:
+          type: code
+          title: Shape
+          code_language: javascript
+          code: 'function main({ a }) { return { a } }'
+          variables: [{ variable: a, value_selector: [s, upload] }, { variable: b, value_selector: [nowhere, x] }, 'bad']
+      - id: p
+        data: { type: code, title: Python step, code_language: python3, code: 'x' }
+      - id: h
+        data: { type: http-request, title: Call API }
+      - id: l
+        data: { type: llm, title: Guess, prompt_template: { role: user, text: 'Use {{#missing.value#}}' } }
+      - id: o
+        data: { type: if-else, title: Legacy, conditions: [{ variable_selector: [j, a], comparison_operator: contains, value: x }] }
+      - id: e
+        data: { type: end, title: Done, outputs: [{ variable: a, value_selector: [j, a] }, { variable: b, value_selector: [nowhere] }, 'bad'] }
+      - 'not a node'
+    edges:
+      - { source: s, target: j }
+      - { source: j, target: l }
+      - { source: l, target: e }
+      - { source: s, target: p }
+      - { source: ghost, target: e }

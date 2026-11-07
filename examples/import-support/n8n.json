@@ -1,0 +1,19 @@
+{
+  "name": "Support triage import example",
+  "nodes": [
+    { "name": "Start", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "parameters": {} },
+    { "name": "Classify", "type": "@n8n/n8n-nodes-langchain.chainLlm", "typeVersion": 1,
+      "parameters": { "text": "=Return only billing or support for {{ $json.message }}" } },
+    { "name": "Normalize", "type": "n8n-nodes-base.code", "typeVersion": 2,
+      "parameters": { "jsCode": "return [{json: {team: String($json.text).trim().toLowerCase()}}];" } },
+    { "name": "Billing", "type": "n8n-nodes-base.if", "typeVersion": 2,
+      "parameters": { "conditions": { "conditions": [
+        { "leftValue": "={{ $json.team }}", "rightValue": "billing", "operator": { "type": "string", "operation": "equals" } }
+      ] } } }
+  ],
+  "connections": {
+    "Start": { "main": [[{ "node": "Classify", "type": "main", "index": 0 }]] },
+    "Classify": { "main": [[{ "node": "Normalize", "type": "main", "index": 0 }]] },
+    "Normalize": { "main": [[{ "node": "Billing", "type": "main", "index": 0 }]] }
+  }
+}

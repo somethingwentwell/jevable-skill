@@ -1,0 +1,20 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: api-echo
+  name: Standalone API echo
+spec:
+  inputSchema:
+    type: string
+  nodes:
+    start:
+      type: trigger
+      config:
+        modes: [api]
+    result:
+      type: output
+      config:
+        value: "${{ inputs }}"
+  edges:
+    - from: start
+      to: result

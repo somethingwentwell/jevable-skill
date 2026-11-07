@@ -1,0 +1,62 @@
+# Review this deliberate policy change; it is not an automatic or equivalent n8n conversion.
+# Select the authorized model ID in this file and your independently configured provider route.
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: support-triage-import-example
+  name: Reviewed support triage
+spec:
+  inputSchema:
+    type: object
+    required: [message]
+    additionalProperties: false
+    properties:
+      message: {type: string, minLength: 1, maxLength: 1000}
+  nodes:
+    start:
+      type: trigger
+      config: {modes: [manual]}
+    judge:
+      type: decision
+      title: Jev · typed team and review judgment
+      config:
+        provider: jev
+        model: your-explicit-model-id
+        answerFormat: systemone-v1
+        connection: {mode: workspace, id: native-decisions}
+        state: '${{ inputs.message }}'
+        execution: {timeoutSeconds: 20, maxAttempts: 1}
+        questions:
+          team:
+            type: choice
+            instructions: Which team should handle this ticket?
+            criteria: {billing: Payments and invoices, support: Product help}
+          review:
+            type: noul
+            instructions: Does this ticket need human review before using its classification?
+    route:
+      type: rule
+      title: Review uncertain or sensitive judgments
+      config:
+        mode: ifElse
+        condition: '${{ nodes.judge.output.team.confidence < 0.7 || nodes.judge.output.review.noul >= 0.65 }}'
+    review:
+      type: humanApproval
+      config:
+        title: Review the typed support classification
+        input: '${{ nodes.judge.output }}'
+        inputSchema: {type: object}
+        actions: [approve, reject]
+        expiresAfter: 1h
+        onReject: cancelled
+        onTimeout: expired
+    result:
+      type: output
+      title: Return the judgment · do not send a reply
+      config: {value: '${{ nodes.judge.output }}'}
+  edges:
+    - {from: start, to: judge}
+    - {from: judge, to: route}
+    - {from: route, port: 'true', to: review}
+    - {from: route, port: 'false', to: result}
+    - {from: review, port: approve, to: result}

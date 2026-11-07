@@ -1,0 +1,114 @@
+{
+  "date": "2026-09-29",
+  "note": "Archify workflow diagrams, not executable Jevable workflows. Visual review separately inspected light/dark captures at 1440x900 and 2048x1320; automated containment passed four desktop sizes. Unlabelled sequence edges express only the order already implied by their endpoints.",
+  "diagrams": [
+    {
+      "schemaVersion": 1,
+      "ok": true,
+      "command": "deliver",
+      "type": "workflow",
+      "input": "architecture/app-delivery.workflow.json",
+      "output": "architecture/app-delivery.html",
+      "specification": {
+        "sha256": "803a761f4ef2bbde61372c075e236c1c0a4d1ef3b6299492ec4b7e599f51fc1b",
+        "bytes": 3953
+      },
+      "artifact": {
+        "sha256": "fa7cdbadd101cb0217c1d97c59c6c2671afda268ee25bb647b9c6d9b4ff3aba8",
+        "bytes": 711628
+      },
+      "validation": {
+        "checksPassed": 9,
+        "checkCount": 9,
+        "compositionProfile": "showcase",
+        "compositionStatus": "pass",
+        "errors": 0,
+        "warnings": 0
+      },
+      "visual_review": "passed",
+      "correction_rounds": 2,
+      "browser_receipt": "app-delivery.visual-check.json"
+    },
+    {
+      "schemaVersion": 1,
+      "ok": true,
+      "command": "deliver",
+      "type": "workflow",
+      "input": "architecture/jev-comparison.workflow.json",
+      "output": "architecture/jev-comparison.html",
+      "specification": {
+        "sha256": "58bb10036b458ae7bc05b20867ddee21027062e89d991432e5fcb6c686d041c6",
+        "bytes": 3394
+      },
+      "artifact": {
+        "sha256": "87231ee1eb3c36d53dd839977670d2a8b457ec89a92b0ef3f9b61e356938fa06",
+        "bytes": 706411
+      },
+      "validation": {
+        "checksPassed": 9,
+        "checkCount": 9,
+        "compositionProfile": "showcase",
+        "compositionStatus": "pass",
+        "errors": 0,
+        "warnings": 0
+      },
+      "visual_review": "passed",
+      "correction_rounds": 2,
+      "browser_receipt": "jev-comparison.visual-check.json"
+    },
+    {
+      "schemaVersion": 1,
+      "ok": true,
+      "command": "deliver",
+      "type": "workflow",
+      "input": "architecture/triage.workflow.json",
+      "output": "architecture/triage.html",
+      "specification": {
+        "sha256": "0c6a1a1dff6a000fbe50322e774363cf67ed87bb2eb314609166a770acc1b667",
+        "bytes": 3510
+      },
+      "artifact": {
+        "sha256": "a7c0140ca5594359231fabf9897da228804a855efd1dd1a2e7f9c5c30a71e9af",
+        "bytes": 708289
+      },
+      "validation": {
+        "checksPassed": 9,
+        "checkCount": 9,
+        "compositionProfile": "showcase",
+        "compositionStatus": "pass",
+        "errors": 0,
+        "warnings": 0
+      },
+      "visual_review": "passed",
+      "correction_rounds": 2,
+      "browser_receipt": "triage.visual-check.json"
+    },
+    {
+      "schemaVersion": 1,
+      "ok": true,
+      "command": "deliver",
+      "type": "workflow",
+      "input": "architecture/traceability.workflow.json",
+      "output": "architecture/traceability.html",
+      "specification": {
+        "sha256": "dd58084165085944658c9c8cdc74f87f9875b8f849bb5c7d9c37818d70cf2af3",
+        "bytes": 3880
+      },
+      "artifact": {
+        "sha256": "71506f649fb1d7020383c89aa94dfefb6918bee0dae2535d6122d0f151520a0c",
+        "bytes": 710756
+      },
+      "validation": {
+        "checksPassed": 9,
+        "checkCount": 9,
+        "compositionProfile": "showcase",
+        "compositionStatus": "pass",
+        "errors": 0,
+        "warnings": 0
+      },
+      "visual_review": "passed",
+      "correction_rounds": 1,
+      "browser_receipt": "traceability.visual-check.json"
+    }
+  ]
+}

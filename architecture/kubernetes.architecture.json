@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "Jevable workflow runtime — Kubernetes (proposed)", "locale": "en", "quality_profile": "showcase", "viewBox": [1390, 690] },
+  "components": [
+    { "id": "clients", "type": "frontend", "label": "CLI + HTML viewer", "sublabel": "Explicit cluster connection", "pos": [50, 110], "size": [210, 76] },
+    { "id": "ingress", "type": "security", "label": "Authenticated ingress", "sublabel": "TLS · single-owner access", "pos": [390, 110], "size": [220, 76] },
+    { "id": "pods", "type": "backend", "label": "Jevable workflow runtime", "sublabel": "Pods · Service · Deployment", "pos": [730, 110], "size": [220, 76] },
+    { "id": "models", "type": "external", "label": "Model providers", "sublabel": "Explicit egress policy", "pos": [1130, 110], "size": [230, 76] },
+    { "id": "secrets", "type": "security", "label": "Secret references", "sublabel": "Provider + database access", "pos": [390, 355], "size": [220, 76] },
+    { "id": "postgres", "type": "database", "label": "Shared PostgreSQL", "sublabel": "Journal · locks · approvals", "pos": [730, 355], "size": [220, 76] },
+    { "id": "collector", "type": "backend", "label": "OTel gateway", "sublabel": "Enrich · batch · export", "pos": [1130, 355], "size": [230, 76] },
+    { "id": "backends", "type": "external", "label": "Telemetry backends", "sublabel": "Traces · metrics · logs", "pos": [1130, 555], "size": [230, 76] }
+  ],
+  "connections": [
+    { "from": "clients", "to": "ingress", "label": "HTTPS", "variant": "security" },
+    { "from": "ingress", "to": "pods", "label": "Service route" },
+    { "from": "pods", "to": "models", "label": "Model request" },
+    { "from": "secrets", "to": "pods", "label": "Resolve credentials", "variant": "security" },
+    { "from": "pods", "to": "postgres", "label": "SQL + locks", "labelAt": [840, 200] },
+    { "from": "pods", "to": "collector", "label": "OTLP", "variant": "dashed" },
+    { "from": "collector", "to": "backends", "label": "Export", "variant": "dashed", "labelAt": [1245, 445] }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Explicit deployment", "items": ["Export manifests; apply on request", "Replica support needs qualification"] },
+    { "dot": "emerald", "title": "Durable continuity", "items": ["Shared state; no per-pod run database", "Resume links retain run + attempt IDs"] },
+    { "dot": "violet", "title": "Observe the cluster", "items": ["Pod / service identity on telemetry", "Alert on drops, failures and backlog"] }
+  ]
+}

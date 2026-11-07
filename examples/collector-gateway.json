@@ -1,0 +1,12 @@
+{
+  "profile": "otelcol-contrib-0.136.0",
+  "receiver": { "protocol": "http/protobuf", "bindAddress": "127.0.0.1", "port": 4318 },
+  "backends": {
+    "traces": { "protocol": "http/protobuf", "endpoint": "https://telemetry.example/v1/traces", "authentication": "bearer-file" },
+    "metrics": { "protocol": "http/protobuf", "endpoint": "https://telemetry.example/v1/metrics", "authentication": "bearer-file" },
+    "logs": { "protocol": "http/protobuf", "endpoint": "https://telemetry.example/v1/logs", "authentication": "bearer-file" }
+  },
+  "memory": { "limitMiB": 400, "spikeLimitMiB": 80 },
+  "batch": { "maxRecords": 512, "timeoutMs": 1000 },
+  "forwarding": { "queueSize": 128, "retryMaxElapsedMs": 30000 }
+}

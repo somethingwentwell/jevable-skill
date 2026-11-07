@@ -1,0 +1,20 @@
+{
+  "metadata": { "version": "1.0.0" },
+  "zaps": [
+    {
+      "id": 301,
+      "title": "Refund replies",
+      "nodes": {
+        "1": { "id": 1, "parent_id": null, "type_of": "read", "selected_api": "GoogleMailV2CLIAPI@2.4.1", "action": "new_email", "title": "New email", "params": {} },
+        "2": { "id": 2, "parent_id": 1, "type_of": "filter", "selected_api": "FilterAPI", "action": "filter", "title": "Only refunds",
+          "params": { "filter_criteria": [[{ "key": "{{1__subject}}", "match": "exact", "value": "Refund" }]] } },
+        "3": { "id": 3, "parent_id": 2, "type_of": "write", "selected_api": "ChatGPTCLIAPI@3.1.0", "action": "conversation", "title": "Draft reply",
+          "params": { "model": "gpt-4o-mini", "user_message": "Draft a short reply to {{1__body_plain}} from {{1__from__email}} ({{1__date|formatted}})." } },
+        "4": { "id": 4, "parent_id": 3, "type_of": "write", "selected_api": "GoogleMailV2CLIAPI@2.4.1", "action": "reply", "title": "Send reply",
+          "params": { "body": "{{3__response}}" } },
+        "5": { "id": 5, "parent_id": 3, "type_of": "write", "selected_api": "SlackCLIAPI@1.40.0", "action": "channel_message", "title": "Notify team", "params": {} }
+      }
+    },
+    { "id": 302, "title": "Second zap", "nodes": { "1": { "id": 1, "parent_id": null, "type_of": "read", "selected_api": "ScheduleAPI", "action": "every_day", "params": {} } } }
+  ]
+}

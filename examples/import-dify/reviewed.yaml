@@ -1,0 +1,35 @@
+apiVersion: jevable.ai/v1alpha1
+extensions:
+  jevable.ai/import:
+    fidelity: exact
+    format: dify
+    sourceSha256: 77c91d2ec97ad2f851f36927d43823f1f96bad2af25f67b9521e3adb24ca0b7c
+    version: 0.1.5
+kind: Workflow
+metadata:
+  id: if-select
+  name: If select (reviewed)
+spec:
+  inputSchema:
+    type: object
+    required: [grade]
+    additionalProperties: false
+    properties:
+      grade: {type: string, enum: [gold, basic]}
+  nodes:
+    start:
+      type: trigger
+      config: {modes: [manual]}
+    gate:
+      type: rule
+      config: {mode: ifElse, condition: '${{ inputs.grade == "gold" }}'}
+    goldOut:
+      type: output
+      config: {value: '${{ inputs.grade }}'}
+    basicOut:
+      type: output
+      config: {value: '${{ inputs.grade }}'}
+  edges:
+    - {from: start, to: gate}
+    - {from: gate, port: 'true', to: goldOut}
+    - {from: gate, port: 'false', to: basicOut}

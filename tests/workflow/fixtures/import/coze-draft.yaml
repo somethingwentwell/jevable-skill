@@ -1,0 +1,57 @@
+schema_version: 1.0.0
+name: Topic writer
+id: "7000000000000000001"
+description: Writes a short paragraph about a topic
+mode: workflow
+icon: plugin_icon/workflow.png
+nodes:
+  - id: "100001"
+    type: start
+    title: 开始
+    icon: ""
+    description: ""
+    position: { x: 0, "y": 0 }
+    parameters:
+      node_outputs:
+        topic: { type: string, required: true }
+        words: { type: integer, required: false }
+  - id: "110001"
+    type: llm
+    title: Draft
+    icon: ""
+    description: ""
+    version: "3"
+    position: { x: 400, "y": 0 }
+    parameters:
+      llmParam:
+        - { name: modelName, input: { type: string, value: demo-model } }
+        - { name: temperature, input: { type: float, value: "0.5" } }
+        - { name: prompt, input: { type: string, value: "Write about {{t}} in {{n}} words." } }
+        - { name: systemPrompt, input: { type: string, value: "" } }
+      node_inputs:
+        - { name: t, input: { value: { ref_node: "100001", path: topic } } }
+        - { name: n, input: { value: { ref_node: "100001", path: words } } }
+      node_outputs:
+        output: { type: string }
+  - id: "120001"
+    type: http
+    title: 发送
+    icon: ""
+    description: ""
+    position: { x: 800, "y": 0 }
+    parameters: {}
+  - id: "900001"
+    type: end
+    title: End
+    icon: ""
+    description: ""
+    position: { x: 1200, "y": 0 }
+    parameters:
+      terminatePlan: returnVariables
+      node_inputs:
+        - { name: text, input: { type: string, value: { ref_node: "110001", path: output } } }
+        - { name: source, input: { type: string, value: coze } }
+edges:
+  - { source_node: "100001", target_node: "110001" }
+  - { source_node: "110001", target_node: "120001" }
+  - { source_node: "120001", target_node: "900001" }

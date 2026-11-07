@@ -1,0 +1,445 @@
+{
+  "nodes": [
+    {
+      "id": "100001",
+      "type": "1",
+      "meta": {
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "data": {
+        "nodeMeta": {
+          "title": "Start"
+        },
+        "outputs": [
+          {
+            "name": "message",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "items",
+            "type": "list",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "140501",
+      "type": "22",
+      "meta": {
+        "position": {
+          "x": 450,
+          "y": 0
+        }
+      },
+      "data": {
+        "nodeMeta": {
+          "title": "Route"
+        },
+        "inputs": {
+          "inputParameters": [
+            {
+              "name": "query",
+              "input": {
+                "type": "string",
+                "value": {
+                  "type": "ref",
+                  "content": {
+                    "source": "block-output",
+                    "blockID": "100001",
+                    "name": "message"
+                  }
+                }
+              }
+            }
+          ],
+          "intents": [
+            {
+              "name": "Process the list"
+            },
+            {
+              "name": "Small talk"
+            }
+          ],
+          "mode": "all",
+          "llmParam": {
+            "modelName": "demo-model",
+            "modelType": 1001,
+            "temperature": 0.2,
+            "topP": 0.7,
+            "maxTokens": 512,
+            "responseFormat": 2,
+            "generationDiversity": "balance",
+            "prompt": {
+              "type": "string",
+              "value": {
+                "type": "literal",
+                "content": "{{query}}"
+              }
+            },
+            "systemPrompt": {
+              "type": "string",
+              "value": {
+                "type": "literal",
+                "content": ""
+              }
+            },
+            "enableChatHistory": false,
+            "chatHistoryRound": 3
+          }
+        },
+        "outputs": [
+          {
+            "name": "classificationId",
+            "type": "integer"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "150601",
+      "type": "21",
+      "meta": {
+        "position": {
+          "x": 900,
+          "y": -150
+        },
+        "canvasPosition": {
+          "x": 900,
+          "y": 150
+        }
+      },
+      "data": {
+        "nodeMeta": {
+          "title": "For each item"
+        },
+        "inputs": {
+          "loopType": "array",
+          "loopCount": {
+            "type": "integer",
+            "value": {
+              "type": "literal",
+              "content": "10"
+            }
+          },
+          "inputParameters": [
+            {
+              "name": "input",
+              "input": {
+                "type": "list",
+                "schema": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "ref",
+                  "content": {
+                    "source": "block-output",
+                    "blockID": "100001",
+                    "name": "items"
+                  }
+                }
+              }
+            }
+          ],
+          "variableParameters": [
+            {
+              "name": "acc",
+              "input": {
+                "type": "string",
+                "value": {
+                  "type": "literal",
+                  "content": ""
+                }
+              }
+            }
+          ]
+        },
+        "outputs": [
+          {
+            "name": "upper_list",
+            "input": {
+              "type": "list",
+              "schema": {
+                "type": "string"
+              },
+              "value": {
+                "type": "ref",
+                "content": {
+                  "source": "block-output",
+                  "blockID": "150602",
+                  "name": "upper"
+                }
+              }
+            }
+          },
+          {
+            "name": "acc_out",
+            "input": {
+              "type": "string",
+              "value": {
+                "type": "ref",
+                "content": {
+                  "source": "block-output",
+                  "blockID": "150601",
+                  "name": "acc"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "blocks": [
+        {
+          "id": "150602",
+          "type": "5",
+          "meta": {
+            "position": {
+              "x": 100,
+              "y": 0
+            }
+          },
+          "data": {
+            "nodeMeta": {
+              "title": "Upper"
+            },
+            "inputs": {
+              "inputParameters": [
+                {
+                  "name": "item",
+                  "input": {
+                    "type": "string",
+                    "value": {
+                      "type": "ref",
+                      "content": {
+                        "source": "block-output",
+                        "blockID": "150601",
+                        "name": "input"
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "i",
+                  "input": {
+                    "type": "integer",
+                    "value": {
+                      "type": "ref",
+                      "content": {
+                        "source": "block-output",
+                        "blockID": "150601",
+                        "name": "index"
+                      }
+                    }
+                  }
+                }
+              ],
+              "code": "async def main(args: Args) -> Output:\n    params = args.params\n    return {\"upper\": str(params['item']).upper()}\n",
+              "language": 3,
+              "settingOnError": {
+                "processType": 1,
+                "timeoutMs": 60000,
+                "retryTimes": 0
+              }
+            },
+            "outputs": [
+              {
+                "name": "upper",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        {
+          "id": "150603",
+          "type": "20",
+          "meta": {
+            "position": {
+              "x": 500,
+              "y": 0
+            }
+          },
+          "data": {
+            "nodeMeta": {
+              "title": "Set acc"
+            },
+            "inputs": {
+              "inputParameters": [
+                {
+                  "left": {
+                    "type": "string",
+                    "value": {
+                      "type": "ref",
+                      "content": {
+                        "source": "block-output",
+                        "blockID": "150601",
+                        "name": "acc"
+                      }
+                    }
+                  },
+                  "right": {
+                    "type": "string",
+                    "value": {
+                      "type": "ref",
+                      "content": {
+                        "source": "block-output",
+                        "blockID": "150602",
+                        "name": "upper"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "edges": [
+        {
+          "sourceNodeID": "150601",
+          "targetNodeID": "150602",
+          "sourcePortID": "loop-function-inline-output"
+        },
+        {
+          "sourceNodeID": "150602",
+          "targetNodeID": "150603"
+        },
+        {
+          "sourceNodeID": "150603",
+          "targetNodeID": "150601",
+          "targetPortID": "loop-function-inline-input"
+        }
+      ]
+    },
+    {
+      "id": "160701",
+      "type": "13",
+      "meta": {
+        "position": {
+          "x": 900,
+          "y": 250
+        }
+      },
+      "data": {
+        "nodeMeta": {
+          "title": "Chat reply"
+        },
+        "inputs": {
+          "inputParameters": [
+            {
+              "name": "m",
+              "input": {
+                "type": "string",
+                "value": {
+                  "type": "ref",
+                  "content": {
+                    "source": "block-output",
+                    "blockID": "100001",
+                    "name": "message"
+                  }
+                }
+              }
+            }
+          ],
+          "content": {
+            "type": "string",
+            "value": {
+              "type": "literal",
+              "content": "You said: {{m}}"
+            }
+          },
+          "streamingOutput": true
+        }
+      }
+    },
+    {
+      "id": "900001",
+      "type": "2",
+      "meta": {
+        "position": {
+          "x": 1400,
+          "y": 0
+        }
+      },
+      "data": {
+        "nodeMeta": {
+          "title": "End"
+        },
+        "inputs": {
+          "terminatePlan": "useAnswerContent",
+          "streamingOutput": false,
+          "inputParameters": [
+            {
+              "name": "items",
+              "input": {
+                "type": "list",
+                "schema": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "ref",
+                  "content": {
+                    "source": "block-output",
+                    "blockID": "150601",
+                    "name": "upper_list"
+                  }
+                }
+              }
+            }
+          ],
+          "content": {
+            "type": "string",
+            "value": {
+              "type": "literal",
+              "content": "Done: {{items}}"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "sourceNodeID": "100001",
+      "targetNodeID": "140501"
+    },
+    {
+      "sourceNodeID": "140501",
+      "targetNodeID": "150601",
+      "sourcePortID": "branch_0"
+    },
+    {
+      "sourceNodeID": "140501",
+      "targetNodeID": "160701",
+      "sourcePortID": "branch_1"
+    },
+    {
+      "sourceNodeID": "140501",
+      "targetNodeID": "160701",
+      "sourcePortID": "default"
+    },
+    {
+      "sourceNodeID": "150601",
+      "targetNodeID": "900001",
+      "sourcePortID": "loop-output"
+    },
+    {
+      "sourceNodeID": "160701",
+      "targetNodeID": "900001"
+    }
+  ],
+  "versions": {
+    "loop": "v2",
+    "batch": "v2"
+  }
+}

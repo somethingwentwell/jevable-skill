@@ -1,0 +1,43 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: review-request
+  name: Review a request
+spec:
+  inputSchema:
+    type: object
+    required: [message]
+    additionalProperties: false
+    properties:
+      message:
+        type: string
+        minLength: 1
+        maxLength: 500
+  nodes:
+    start:
+      type: trigger
+      config:
+        modes: [manual]
+    review:
+      type: humanApproval
+      config:
+        title: Review this request
+        input: "${{ inputs.message }}"
+        inputSchema:
+          type: string
+          minLength: 1
+          maxLength: 500
+        actions: [approve, reject]
+        expiresAfter: 24h
+        onReject: cancelled
+        onTimeout: expired
+    result:
+      type: output
+      config:
+        value: "${{ nodes.review.output.action }}"
+  edges:
+    - from: start
+      to: review
+    - from: review
+      port: approve
+      to: result

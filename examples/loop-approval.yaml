@@ -1,0 +1,48 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: item-review
+  name: Review each item
+spec:
+  inputSchema:
+    type: array
+    items: { type: string }
+    maxItems: 3
+  nodes:
+    start:
+      type: trigger
+      config: { modes: [manual] }
+    each:
+      type: loop
+      config:
+        mode: forEach
+        items: "${{ inputs }}"
+        maxIterations: 3
+        timeoutSeconds: 3600
+        body:
+          entry: review
+          nodes:
+            review:
+              type: humanApproval
+              config:
+                title: Review this item
+                input: "${{ loop.item }}"
+                inputSchema: { type: string }
+                actions: [approve, reject]
+                expiresAfter: 30m
+                onReject: branch
+                onTimeout: expired
+          edges: []
+          exits:
+            - from: review
+              port: approve
+              result: { item: "${{ loop.item }}", action: "${{ nodes.review.output.action }}" }
+            - from: review
+              port: reject
+              result: { item: "${{ loop.item }}", action: "${{ nodes.review.output.action }}" }
+    result:
+      type: output
+      config: { value: "${{ nodes.each.output }}" }
+  edges:
+    - { from: start, to: each }
+    - { from: each, port: done, to: result }

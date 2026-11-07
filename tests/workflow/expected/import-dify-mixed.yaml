@@ -1,0 +1,65 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: imported-dify-workflow
+  name: Imported Dify workflow
+extensions:
+  jevable.ai/import:
+    format: dify
+    version: 0.3.0
+    fidelity: unsupported
+    sourceSha256: 1589a8a2cc2a814f5dd39df273bead9940014983fcbb1c8d3c50ed21cfb498c9
+spec:
+  inputSchema:
+    type: object
+    properties:
+      upload:
+        type: string
+  nodes:
+    s:
+      type: trigger
+      config:
+        modes:
+          - manual
+      title: s
+    Shape:
+      type: custom
+      config:
+        language: javascript
+        code: function main({ a }) { return { a } }
+        input:
+          a: ${{ inputs.upload }}
+        outputSchema:
+          type: object
+      title: Shape
+    Guess:
+      type: llm
+      config:
+        provider: choose-provider
+        model: choose-model
+        connection:
+          mode: workspace
+          id: choose-an-allowed-model
+        prompt: Use {{#missing.value#}}
+        responseFormat: text
+        generation:
+          maxTokens: 1024
+          stream: true
+        historyScope: none
+        execution:
+          timeoutSeconds: 60
+          maxAttempts: 1
+      title: Guess
+    Done:
+      type: output
+      config:
+        value:
+          a: ${{ nodes.Shape.output.a }}
+      title: Done
+  edges:
+    - from: s
+      to: Shape
+    - from: Shape
+      to: Guess
+    - from: Guess
+      to: Done

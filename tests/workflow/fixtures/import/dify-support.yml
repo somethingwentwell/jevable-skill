@@ -1,0 +1,51 @@
+app:
+  name: Support answer
+  mode: workflow
+kind: app
+version: 0.1.5
+workflow:
+  graph:
+    nodes:
+      - id: '100'
+        data:
+          type: start
+          title: Start
+          variables:
+            - { variable: question, type: paragraph, required: true, max_length: 500 }
+            - { variable: tier, type: select, required: true, options: [gold, basic] }
+            - { variable: amount, type: number, required: true }
+      - id: '200'
+        data:
+          type: if-else
+          title: Gold customer
+          cases:
+            - case_id: gold
+              logical_operator: and
+              conditions:
+                - { variable_selector: ['100', tier], comparison_operator: is, value: gold }
+                - { variable_selector: ['100', amount], comparison_operator: '≥', value: '10' }
+      - id: '300'
+        data:
+          type: llm
+          title: Draft answer
+          model: { provider: openai, name: gpt-4o-mini }
+          prompt_template:
+            - { role: system, text: You answer support questions. }
+            - { role: user, text: 'Answer {{#100.question#}}' }
+      - id: '400'
+        data:
+          type: end
+          title: Answer
+          outputs:
+            - { variable: answer, value_selector: ['300', text] }
+      - id: '500'
+        data:
+          type: end
+          title: Standard reply
+          outputs:
+            - { variable: tier, value_selector: ['100', tier] }
+    edges:
+      - { source: '100', target: '200', sourceHandle: source }
+      - { source: '200', target: '300', sourceHandle: gold }
+      - { source: '200', target: '500', sourceHandle: 'false' }
+      - { source: '300', target: '400', sourceHandle: source }

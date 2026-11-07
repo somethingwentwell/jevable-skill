@@ -1,0 +1,179 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Support triage — the app executes each step",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "frontend": {
+          "label": "Input / viewer"
+        },
+        "backend": {
+          "label": "Workflow logic"
+        },
+        "database": {
+          "label": "Saved evidence"
+        },
+        "security": {
+          "label": "Review / policy"
+        },
+        "cloud": {
+          "label": "Container runtime"
+        },
+        "messagebus": {
+          "label": "Telemetry"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "auto",
+      "label": "Workflow runtime"
+    },
+    {
+      "id": "human",
+      "label": "Human review"
+    },
+    {
+      "id": "output",
+      "label": "Returned outcome"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "ticket",
+      "lane": "auto",
+      "col": 0,
+      "type": "frontend",
+      "label": "Ticket input",
+      "sublabel": "Sample or real request",
+      "width": 160
+    },
+    {
+      "id": "jev",
+      "lane": "auto",
+      "col": 1,
+      "type": "backend",
+      "label": "Decision (Jev)",
+      "sublabel": "Urgency + confidence",
+      "width": 160
+    },
+    {
+      "id": "rule",
+      "lane": "auto",
+      "col": 2,
+      "type": "backend",
+      "label": "Confidence rule",
+      "sublabel": "Threshold: 80%",
+      "width": 160
+    },
+    {
+      "id": "draft",
+      "lane": "auto",
+      "col": 3,
+      "type": "backend",
+      "label": "LLM: draft reply",
+      "sublabel": "Writing, not sending",
+      "width": 167
+    },
+    {
+      "id": "result",
+      "lane": "output",
+      "col": 4,
+      "type": "frontend",
+      "label": "Return draft",
+      "sublabel": "Retain run evidence",
+      "width": 160
+    },
+    {
+      "id": "approval",
+      "lane": "human",
+      "col": 2,
+      "type": "security",
+      "label": "Human Approval",
+      "sublabel": "Save request and wait",
+      "width": 160
+    },
+    {
+      "id": "reject",
+      "lane": "human",
+      "col": 4,
+      "type": "security",
+      "label": "Stop without draft",
+      "sublabel": "Record rejection",
+      "width": 181
+    }
+  ],
+  "edges": [
+    {
+      "from": "ticket",
+      "to": "jev"
+    },
+    {
+      "from": "jev",
+      "to": "rule"
+    },
+    {
+      "from": "rule",
+      "to": "draft",
+      "label": "At least 80%"
+    },
+    {
+      "from": "rule",
+      "to": "approval",
+      "label": "Below 80%"
+    },
+    {
+      "from": "approval",
+      "to": "draft",
+      "label": "Approve"
+    },
+    {
+      "from": "approval",
+      "to": "reject",
+      "label": "Reject"
+    },
+    {
+      "from": "draft",
+      "to": "result",
+      "route": "outside-right"
+    }
+  ],
+  "mainPath": [
+    "ticket",
+    "jev",
+    "rule",
+    "draft",
+    "result"
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Judgment and routing are separate",
+      "items": [
+        "Jev produces the typed decision",
+        "The Rule selects the permitted branch"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "A real approval gate",
+      "items": [
+        "Persist the wait and authorized decision",
+        "Refresh never approves or restarts a run"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "A runnable app",
+      "items": [
+        "Runtime executes; browser shows evidence",
+        "This example returns a draft without sending"
+      ]
+    }
+  ]
+}

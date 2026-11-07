@@ -1,0 +1,1172 @@
+{
+  "id": null,
+  "uid": "jevable-workflow-runtime",
+  "title": "Jevable workflow runtime",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": [
+    "jevable",
+    "workflow-runtime",
+    "development"
+  ],
+  "timezone": "browser",
+  "editable": false,
+  "refresh": "5s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "label": "Service",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(jevable_retained_available, service_name)",
+        "definition": "label_values(jevable_retained_available, service_name)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      },
+      {
+        "name": "environment",
+        "label": "Environment",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(jevable_retained_available{service_name=~\"${service:regex}\"}, deployment_environment_name)",
+        "definition": "label_values(jevable_retained_available{service_name=~\"${service:regex}\"}, deployment_environment_name)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      },
+      {
+        "name": "instance",
+        "label": "Runtime instance",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(jevable_retained_available{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\"}, service_instance_id)",
+        "definition": "label_values(jevable_retained_available{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\"}, service_instance_id)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Jevable workflow runtime — diagnostic evidence",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "Select **one service, environment and runtime instance**. A new owner gets a new instance ID; do not sum retained checkpoints across old and new owners. This dashboard observes active segments, not unique runs or business completion. **No data means unknown**, not healthy or zero. Backlog/approval panels require a complete projection received within 30 seconds. HTTP 200 does not prove workflow success. Local development profile; review thresholds before production use."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Evidence freshness and retained work",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Retained projection available (fresh only)",
+      "description": "Only complete retained projections with a sample less than 30 seconds old. Missing/unavailable data is not zero.",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "jevable:retained_available:fresh{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}",
+          "legendFormat": "available",
+          "range": false,
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Seconds since last retained-state sample",
+      "description": "Observation freshness, not receiver availability or complete delivery. An empty result is unknown.",
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "time() - timestamp(jevable_retained_available{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"})",
+          "legendFormat": "sample age",
+          "range": false,
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Retained checkpoints by state",
+      "description": "History retained by this owner, not a distributed queue. Executing can be uncertain durable intent.",
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(jevable_retained_runs{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}) and on (service_name, service_instance_id, deployment_environment_name) jevable:retained_available:fresh{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}",
+          "legendFormat": "{{jevable_retained_state}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Active execution segments",
+      "description": "Process-local active work only, not approval backlog. Short-lived processes may not be observable between exports.",
+      "gridPos": {
+        "x": 12,
+        "y": 11,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "jevable_execution_active{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}",
+          "legendFormat": "{{jevable_operation}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Unsettled approvals",
+      "description": "Expired means past deadline, not automatically settled. Fresh projection required.",
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(jevable_retained_approvals{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}) and on (service_name, service_instance_id, deployment_environment_name) jevable:retained_available:fresh{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}",
+          "legendFormat": "{{jevable_retained_state}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Oldest unsettled approval age",
+      "description": "Includes persisted waiting time and downtime. Zero is empty only when projection is fresh and available.",
+      "gridPos": {
+        "x": 12,
+        "y": 18,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(jevable_retained_approval_oldest_age{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}) and on (service_name, service_instance_id, deployment_environment_name) jevable:retained_available:fresh{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}",
+          "legendFormat": "{{jevable_retained_state}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Execution and model observations",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Ended segments / second",
+      "description": "Run/resume/approval/cancel segment observations, not unique runs.",
+      "gridPos": {
+        "x": 0,
+        "y": 26,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (jevable_operation, jevable_outcome) (rate(jevable_execution_segments{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval]))",
+          "legendFormat": "{{jevable_operation}} · {{jevable_outcome}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Execution duration p50 / p95 / p99",
+      "description": "Active segment duration; human waiting between segments is excluded.",
+      "gridPos": {
+        "x": 12,
+        "y": 26,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(jevable_execution_duration_bucket{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval])))",
+          "legendFormat": "{{__name__}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(jevable_execution_duration_bucket{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval])))",
+          "legendFormat": "{{__name__}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "refId": "C",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(jevable_execution_duration_bucket{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval])))",
+          "legendFormat": "{{__name__}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Ended node attempts / second",
+      "gridPos": {
+        "x": 0,
+        "y": 33,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (jevable_node_kind, jevable_outcome) (rate(jevable_node_attempts{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval]))",
+          "legendFormat": "{{jevable_node_kind}} · {{jevable_outcome}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Node latency p95",
+      "gridPos": {
+        "x": 12,
+        "y": 33,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le, jevable_node_kind) (rate(jevable_node_duration_bucket{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval])))",
+          "legendFormat": "{{jevable_node_kind}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Model adapter calls / second",
+      "description": "Adapter observations, not all provider HTTP requests or settled nodes.",
+      "gridPos": {
+        "x": 0,
+        "y": 40,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (jevable_node_kind, jevable_outcome) (rate(jevable_model_calls{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval]))",
+          "legendFormat": "{{jevable_node_kind}} · {{jevable_outcome}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Reported model tokens / second",
+      "description": "Only usage actually reported by the provider. Missing usage is not estimated; this is not durable billing.",
+      "gridPos": {
+        "x": 12,
+        "y": 40,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (jevable_token_direction) (rate(jevable_model_tokens{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval]))",
+          "legendFormat": "{{jevable_token_direction}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "Retry-enabled transport tries / second",
+      "description": "Try observation/dispatch is not provider receipt or successful node settlement. Single-try calls are outside this instrument.",
+      "gridPos": {
+        "x": 0,
+        "y": 47,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (jevable_model_try_phase, jevable_model_try_dispatched, jevable_outcome) (rate(jevable_model_try_attempts{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval]))",
+          "legendFormat": "{{jevable_model_try_phase}} · dispatched={{jevable_model_try_dispatched}} · {{jevable_outcome}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "Admitted saved-response recovery / second",
+      "description": "Admitted observations only; denied controls and stable-ID retries do not recount recovery.",
+      "gridPos": {
+        "x": 12,
+        "y": 47,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (jevable_recovery_settled, jevable_outcome) (rate(jevable_recovery_attempts{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval]))",
+          "legendFormat": "settled={{jevable_recovery_settled}} · {{jevable_outcome}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "API and exporter health",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 54,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 19,
+      "type": "timeseries",
+      "title": "HTTP request observations / second",
+      "description": "Requires httpRequests. Counts API traffic, not committed workflow operations.",
+      "gridPos": {
+        "x": 0,
+        "y": 55,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (jevable_http_status_class, jevable_http_outcome) (rate(jevable_http_requests{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval]))",
+          "legendFormat": "{{jevable_http_status_class}} · {{jevable_http_outcome}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "HTTP handler/response duration p95",
+      "description": "Waits for handler and response settlement, including work after disconnect. Not client receipt.",
+      "gridPos": {
+        "x": 12,
+        "y": 55,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(jevable_http_duration_bucket{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}[$__rate_interval])))",
+          "legendFormat": "{{jevable_outcome}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Dropped / rejected telemetry items",
+      "description": "Process-local counters. A failed metrics receiver cannot report its own loss until delivery recovers.",
+      "gridPos": {
+        "x": 0,
+        "y": 62,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (jevable_telemetry_signal, jevable_telemetry_state) (increase(jevable_telemetry_records{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\",jevable_telemetry_state=~\"dropped|rejected\"}[$__rate_interval]))",
+          "legendFormat": "{{jevable_telemetry_signal}} · {{jevable_telemetry_state}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "timeseries",
+      "title": "Queued / in-flight telemetry items",
+      "description": "Exporter occupancy, not workflow backlog.",
+      "gridPos": {
+        "x": 12,
+        "y": 62,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "jevable_telemetry_occupancy{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}",
+          "legendFormat": "{{jevable_telemetry_signal}} · {{jevable_telemetry_state}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "type": "timeseries",
+      "title": "Last exporter failure category",
+      "description": "None means no retained last failure, not proof of backend retention.",
+      "gridPos": {
+        "x": 0,
+        "y": 69,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "jevable_telemetry_last_failure{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"} == 1",
+          "legendFormat": "{{jevable_telemetry_signal}} · {{jevable_telemetry_state}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "type": "timeseries",
+      "title": "Receiver acknowledgement age",
+      "description": "No acknowledgement (zero) is omitted as unknown. Inactive trace/log pipelines may legitimately have old acknowledgements.",
+      "gridPos": {
+        "x": 12,
+        "y": 69,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "No data — unknown",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(time() - jevable_telemetry_last_success{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"}) and (jevable_telemetry_last_success{service_name=~\"${service:regex}\",deployment_environment_name=~\"${environment:regex}\",service_instance_id=~\"${instance:regex}\"} > 0)",
+          "legendFormat": "{{jevable_telemetry_signal}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "type": "logs",
+      "title": "Correlated structured logs",
+      "description": "Metadata-only runtime events. Trace identity may be unsampled or unavailable; the journal remains authoritative.",
+      "gridPos": {
+        "x": 0,
+        "y": 76,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=~\"${service:regex}\"} | service_instance_id =~ \"${instance:regex}\"",
+          "queryType": "range",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "showLabels": false,
+        "showCommonLabels": false
+      }
+    },
+    {
+      "id": 26,
+      "title": "Inspect traces without replay",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 86,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "Open **Explore → Tempo** and search the exact trace ID from `jevable runs traces <run-id>`, or follow a trace link in a structured log. Missing/expired/unsampled traces do not authorize retry. Dashboard data is diagnostic and can lag, be sampled or be dropped. Review alert state in Prometheus through the Grafana data source; no notification destination is configured."
+      }
+    }
+  ]
+}

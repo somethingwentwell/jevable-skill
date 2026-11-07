@@ -1,0 +1,86 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: ticket-triage
+  name: Ticket triage
+extensions:
+  jevable.ai/import:
+    format: n8n
+    fidelity: exact
+    sourceSha256: 9fe6ba936f158e6a86ff8bbf896b22ec1852cbc8c966534d7b98b9c438ec2df6
+spec:
+  inputSchema:
+    type: object
+    properties:
+      priority:
+        type: string
+      open:
+        type: boolean
+      team:
+        type: string
+    required:
+      - priority
+      - open
+      - team
+  nodes:
+    When_clicking_Test_workflow:
+      type: trigger
+      config:
+        modes:
+          - manual
+      title: When clicking Test workflow
+    Is_urgent:
+      type: rule
+      config:
+        mode: ifElse
+        condition: ${{ inputs.priority == "high" && inputs.open }}
+      title: Is urgent?
+    Route_by_team:
+      type: rule
+      config:
+        mode: switch
+        value: ${{ inputs.team }}
+        cases:
+          - port: case1
+            value: billing
+          - port: case2
+            value: tech
+      title: Route by team
+    Is_urgent_false_result:
+      type: output
+      title: Result
+      config:
+        value: ${{ nodes.Is_urgent.output }}
+    Route_by_team_case1_result:
+      type: output
+      title: Result
+      config:
+        value: ${{ nodes.Route_by_team.output }}
+    Route_by_team_case2_result:
+      type: output
+      title: Result
+      config:
+        value: ${{ nodes.Route_by_team.output }}
+    Route_by_team_default_result:
+      type: output
+      title: Result
+      config:
+        value: ${{ nodes.Route_by_team.output }}
+  edges:
+    - from: When_clicking_Test_workflow
+      to: Is_urgent
+    - from: Is_urgent
+      to: Route_by_team
+      port: "true"
+    - from: Is_urgent
+      to: Is_urgent_false_result
+      port: "false"
+    - from: Route_by_team
+      to: Route_by_team_case1_result
+      port: case1
+    - from: Route_by_team
+      to: Route_by_team_case2_result
+      port: case2
+    - from: Route_by_team
+      to: Route_by_team_default_result
+      port: default

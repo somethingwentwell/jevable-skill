@@ -1,0 +1,88 @@
+rule_files:
+  - alerts.yaml
+evaluation_interval: 5s
+tests:
+  - name: Fresh retained projection permits exact-instance backlog
+    interval: 10s
+    input_series:
+      - series: 'jevable_retained_available{service_name="jevable-workflow-runtime",service_instance_id="current",deployment_environment_name="local"}'
+        values: '1+0x12'
+      - series: 'jevable_retained_approvals{service_name="jevable-workflow-runtime",service_instance_id="current",deployment_environment_name="local",jevable_retained_state="awaiting"}'
+        values: '2+0x12'
+    promql_expr_test:
+      - expr: 'sum(jevable_retained_approvals and on (service_name,service_instance_id,deployment_environment_name) jevable:retained_available:fresh)'
+        eval_time: 1m
+        exp_samples: [{labels: '{}', value: 2}]
+    alert_rule_test:
+      - {eval_time: 1m, alertname: JevableTelemetryMissing, exp_alerts: []}
+      - {eval_time: 1m, alertname: JevableRetainedStateUnavailable, exp_alerts: []}
+  - name: Old owner samples do not become current-owner backlog
+    interval: 10s
+    input_series:
+      - series: 'jevable_retained_available{service_name="jevable-workflow-runtime",service_instance_id="old",deployment_environment_name="local"}'
+        values: '1'
+      - series: 'jevable_retained_approvals{service_name="jevable-workflow-runtime",service_instance_id="old",deployment_environment_name="local",jevable_retained_state="awaiting"}'
+        values: '99'
+      - series: 'jevable_retained_available{service_name="jevable-workflow-runtime",service_instance_id="new",deployment_environment_name="local"}'
+        values: '1+0x12'
+      - series: 'jevable_retained_approvals{service_name="jevable-workflow-runtime",service_instance_id="new",deployment_environment_name="local",jevable_retained_state="awaiting"}'
+        values: '1+0x12'
+    promql_expr_test:
+      - expr: 'sum(jevable_retained_approvals and on (service_name,service_instance_id,deployment_environment_name) jevable:retained_available:fresh)'
+        eval_time: 1m
+        exp_samples: [{labels: '{}', value: 1}]
+  - name: Missing samples are unknown rather than a zero backlog
+    interval: 10s
+    input_series:
+      - series: 'jevable_retained_available{service_name="jevable-workflow-runtime",service_instance_id="old",deployment_environment_name="local"}'
+        values: '1'
+      - series: 'jevable_retained_approvals{service_name="jevable-workflow-runtime",service_instance_id="old",deployment_environment_name="local",jevable_retained_state="expired"}'
+        values: '3'
+    promql_expr_test:
+      - expr: 'jevable_retained_approvals and on (service_name,service_instance_id,deployment_environment_name) jevable:retained_available:fresh'
+        eval_time: 1m
+        exp_samples: []
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: JevableTelemetryMissing
+        exp_alerts:
+          - exp_labels: {service_name: jevable-workflow-runtime, deployment_environment_name: local, severity: warning}
+            exp_annotations:
+              summary: Expected local Jevable telemetry is missing
+              description: Check the explicitly expected service/environment, runtime, collector and receiver. Absence is unknown, not zero workload. Do not replay workflows.
+      - {eval_time: 1m, alertname: JevableApprovalPastDeadline, exp_alerts: []}
+  - name: Unavailable projection suppresses retained gauges and raises its own alert
+    interval: 10s
+    input_series:
+      - series: 'jevable_retained_available{service_name="jevable-workflow-runtime",service_instance_id="current",deployment_environment_name="local"}'
+        values: '0+0x12'
+      - series: 'jevable_retained_approvals{service_name="jevable-workflow-runtime",service_instance_id="current",deployment_environment_name="local",jevable_retained_state="expired"}'
+        values: '4+0x12'
+    promql_expr_test:
+      - expr: 'jevable_retained_approvals and on (service_name,service_instance_id,deployment_environment_name) jevable:retained_available:fresh'
+        eval_time: 1m
+        exp_samples: []
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: JevableRetainedStateUnavailable
+        exp_alerts:
+          - exp_labels: {service_name: jevable-workflow-runtime, service_instance_id: current, deployment_environment_name: local, severity: warning}
+            exp_annotations:
+              summary: Retained-state projection is unavailable
+              description: Inspect owner/storage health and retained evidence. Do not interpret missing backlog gauges as empty or repair storage automatically.
+      - {eval_time: 1m, alertname: JevableApprovalPastDeadline, exp_alerts: []}
+  - name: Actual past-deadline approval raises an informational human-action alert
+    interval: 10s
+    input_series:
+      - series: 'jevable_retained_available{service_name="jevable-workflow-runtime",service_instance_id="current",deployment_environment_name="local"}'
+        values: '1+0x12'
+      - series: 'jevable_retained_approvals{service_name="jevable-workflow-runtime",service_instance_id="current",deployment_environment_name="local",jevable_retained_state="expired"}'
+        values: '1+0x12'
+    alert_rule_test:
+      - eval_time: 40s
+        alertname: JevableApprovalPastDeadline
+        exp_alerts:
+          - exp_labels: {service_name: jevable-workflow-runtime, service_instance_id: current, deployment_environment_name: local, jevable_retained_state: expired, severity: warning}
+            exp_annotations:
+              summary: An unsettled approval is past its deadline
+              description: Inspect the pinned run and request. Sampling does not expire, approve, reject or resume it.

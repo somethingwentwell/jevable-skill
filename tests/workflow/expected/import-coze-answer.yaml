@@ -1,0 +1,70 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: imported-coze-workflow
+  name: Imported Coze workflow
+extensions:
+  jevable.ai/import:
+    format: coze
+    version: studio-export
+    fidelity: unsupported
+    sourceSha256: 036a569bea1e725c938c8f7a8a17b4ba828cffd389b19fb9781d85df0aca3022
+spec:
+  inputSchema:
+    type: object
+    properties:
+      question:
+        type: string
+      strict:
+        type: boolean
+    required:
+      - question
+  nodes:
+    Start:
+      type: trigger
+      config:
+        modes:
+          - manual
+      title: Start
+    Answer:
+      type: llm
+      config:
+        provider: choose-provider
+        model: demo-model
+        connection:
+          mode: workspace
+          id: choose-an-allowed-model
+        prompt: "Question: ${{ inputs.question }}"
+        systemPrompt: Answer briefly.
+        responseFormat: text
+        generation:
+          maxTokens: 1024
+          stream: true
+        historyScope: none
+        execution:
+          timeoutSeconds: 60
+          maxAttempts: 1
+      title: Answer
+    Is_empty:
+      type: custom
+      description: The original condition uses operators that have no Jevable rule
+        equivalent.
+      config:
+        language: javascript
+        code: ""
+        input: {}
+        outputSchema:
+          type: object
+      title: Is empty?
+    Is_empty_result:
+      type: output
+      title: Result
+      config:
+        value: ${{ nodes.Is_empty.output }}
+  edges:
+    - from: Start
+      to: Answer
+    - from: Answer
+      to: Is_empty
+    - from: Is_empty
+      to: Is_empty_result

@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": { "title": "Review a request — execution paths", "locale": "en", "quality_profile": "showcase",
+    "legend": { "entries": { "frontend": { "label": "Trigger" }, "backend": { "label": "Workflow output" }, "security": { "label": "Approval / outcome" } } } },
+  "lanes": [
+    { "id": "accepted", "label": "Approved path" },
+    { "id": "stopped", "label": "Stopped runs", "variant": "exception" }
+  ],
+  "mainPath": ["request", "review", "result"],
+  "nodes": [
+    { "id": "request", "lane": "accepted", "col": 0, "type": "frontend", "label": "Request", "sublabel": "start · manual trigger" },
+    { "id": "review", "lane": "accepted", "col": 2, "type": "security", "label": "Human review", "sublabel": "review · persisted wait", "tag": "expires after 24h", "width": 160 },
+    { "id": "result", "lane": "accepted", "col": 5, "type": "backend", "label": "Return approval", "sublabel": "result · workflow output", "width": 160 },
+    { "id": "rejected", "lane": "stopped", "col": 3, "type": "security", "label": "Rejected", "sublabel": "runtime failure outcome" },
+    { "id": "expired", "lane": "stopped", "col": 5, "type": "security", "label": "Expired", "sublabel": "runtime failure outcome" }
+  ],
+  "edges": [
+    { "id": "request-review", "from": "request", "to": "review", "label": "message input" },
+    { "id": "review-result", "from": "review", "to": "result", "label": "approve", "variant": "emphasis" },
+    { "id": "review-rejected", "from": "review", "to": "rejected", "label": "reject", "variant": "security", "role": "error" },
+    { "id": "review-expired", "from": "review", "to": "expired", "label": "decision after deadline", "variant": "dashed", "role": "error" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Actual workflow", "items": ["examples/approval.yaml defines three nodes.", "Rejected and expired are runtime outcomes, not extra workflow nodes."] },
+    { "dot": "amber", "title": "Inspection is not execution", "items": ["Opening a diagram never starts or resumes a run.", "A decision checks the saved attempt and deadline before continuing."] }
+  ]
+}

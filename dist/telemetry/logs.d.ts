@@ -1,0 +1,42 @@
+import { type Attributes, type Span, type SpanContext } from '@opentelemetry/api';
+import type { Resource } from '@opentelemetry/resources';
+import type { TelemetryPolicy } from './config.ts';
+import type { OtlpCredential } from './otlp.ts';
+export declare class RuntimeLogs {
+    private readonly provider;
+    private readonly processor;
+    private readonly logger;
+    private closing;
+    constructor(policy: TelemetryPolicy, credential: OtlpCredential, resource: Resource, canExport?: () => boolean);
+    observe(span: Span, name: string, attributes: Attributes, previous?: SpanContext): Span;
+    status(): {
+        unit: string;
+        queued: number;
+        inFlight: number;
+        lastSuccessAt: string | null;
+        lastFailure: "response" | "transport" | "serialization" | "partial-rejection" | null;
+        closed: boolean;
+        deliveryGuarantee: string;
+        accepted: number;
+        exported: number;
+        rejected: number;
+        dropped: number;
+        failedBatches: number;
+        successfulBatches: number;
+        enabled: boolean;
+        protocol: "http/protobuf" | "grpc";
+    };
+    suite(attributes: Attributes, seconds: number, context: SpanContext, failed: boolean): void;
+    notification(attributes: Attributes, seconds: number, context: SpanContext, failed: boolean): void;
+    httpRequest(attributes: Attributes, seconds: number, context: SpanContext, failed: boolean): void;
+    httpAccess(attributes: Attributes, seconds: number, context: SpanContext, failed: boolean): void;
+    httpRateSql(attributes: Attributes, seconds: number, context: SpanContext, failed: boolean): void;
+    grantOperation(attributes: Attributes, seconds: number, context: SpanContext, failed: boolean): void;
+    grantPolicy(attributes: Attributes, seconds: number, context: SpanContext, failed: boolean): void;
+    journalTransaction(attributes: Attributes, seconds: number, context: SpanContext, failed: boolean): void;
+    httpConnection(attributes: Attributes, seconds: number, context: SpanContext, failed: boolean): void;
+    httpTransportFailure(attributes: Attributes, context: SpanContext): void;
+    busy(): boolean;
+    flush(): Promise<void>;
+    close(): Promise<void>;
+}

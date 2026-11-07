@@ -1,0 +1,32 @@
+import { previewViewer } from './viewer.ts';
+import { projectPreviewExecution } from './execution.ts';
+import { liveTestControls } from './test-controls.ts';
+import { liveTestCoverageControls } from './test-coverage-controls.ts';
+import { projectPreviewTestResult } from './test-result-view.ts';
+import { liveModelHistoryControls } from './model-history-controls.ts';
+import { projectPreviewModelHistory } from './model-history.ts';
+import { schemaInputTools } from './input-model.ts';
+import { liveInputControls } from './input-controls.ts';
+import { prepareEvidenceDownload } from './evidence-download.ts';
+import { liveEvidenceControls } from './evidence-controls.ts';
+import { traceNavigationTools } from '../telemetry/navigation.ts';
+import { liveTraceControls } from './trace-controls.ts';
+import { liveBreakpointControls } from './breakpoint-controls.ts';
+import { previewRecoveryTarget } from './recovery.ts';
+import { liveEvidenceBundleControls } from './evidence-bundle-controls.ts';
+import { prepareEvidenceBundleDownload } from './evidence-bundle-download.ts';
+import { liveReleaseControls } from './release-controls.ts';
+import { previewReleaseTools } from './release-download.ts';
+import { liveProjectExportControls } from './project-controls.ts';
+import { prepareProjectDownload } from './project-download.ts';
+import { liveNodeInspectionControls } from './node-inspection-controls.ts';
+import { liveNotificationHistoryControls } from './notification-history-controls.ts';
+import { projectPreviewNotificationHistory } from './notification-history.ts';
+import { liveUsageControls } from './usage-controls.ts';
+import { previewUsageTools } from './usage.ts';
+/** Serialized browser controller. Credentials stay in tab-scoped storage, never URLs or portable HTML. */
+export declare function livePreviewBrowser(viewer: typeof previewViewer, instanceId: string, protocol: string, setupTests?: typeof liveTestControls, projectExecution?: typeof projectPreviewExecution, setupModelHistory?: typeof liveModelHistoryControls, projectModelHistory?: typeof projectPreviewModelHistory, setupInput?: typeof liveInputControls, inputTools?: typeof schemaInputTools, setupEvidence?: typeof liveEvidenceControls, prepareEvidence?: typeof prepareEvidenceDownload, setupTraces?: typeof liveTraceControls, navigationTools?: typeof traceNavigationTools, setupBreakpoints?: typeof liveBreakpointControls, recoveryTarget?: typeof previewRecoveryTarget, setupEvidenceBundle?: typeof liveEvidenceBundleControls, prepareEvidenceBundle?: typeof prepareEvidenceBundleDownload, setupRelease?: typeof liveReleaseControls, releaseTools?: typeof previewReleaseTools, setupProjectExport?: typeof liveProjectExportControls, prepareProject?: typeof prepareProjectDownload, setupNodeInspection?: typeof liveNodeInspectionControls, setupNotificationHistory?: typeof liveNotificationHistoryControls, projectNotifications?: typeof projectPreviewNotificationHistory, setupUsage?: typeof liveUsageControls, usageTools?: typeof previewUsageTools, setupTestCoverage?: typeof liveTestCoverageControls, projectTestResult?: typeof projectPreviewTestResult, autoConnect?: boolean): void;
+export declare function renderLivePage(instanceId: string, protocol: string, credential?: 'owner' | 'preview', autoConnect?: boolean): {
+    html: string;
+    csp: string;
+};

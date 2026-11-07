@@ -1,0 +1,187 @@
+{
+  "questions": {
+    "needsHuman": {
+      "type": "noul",
+      "instructions": "Does this need review?"
+    },
+    "route": {
+      "type": "choice",
+      "instructions": "Which team?",
+      "criteria": {
+        "billing": "Payments",
+        "technical": "Bugs"
+      }
+    },
+    "urgency": {
+      "type": "score",
+      "instructions": "How urgent?",
+      "criteria": [
+        "Routine",
+        "Soon",
+        "Immediate"
+      ]
+    }
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "needsHuman": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "noul"
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "type",
+          "probability",
+          "confidence"
+        ],
+        "additionalProperties": false
+      },
+      "route": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "choice"
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "choice": {
+            "type": "string",
+            "enum": [
+              "billing",
+              "technical"
+            ]
+          },
+          "probabilities": {
+            "type": "object",
+            "properties": {
+              "billing": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "technical": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "billing",
+              "technical"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "choice",
+          "probabilities",
+          "confidence"
+        ],
+        "additionalProperties": false
+      },
+      "urgency": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "score"
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 2
+          },
+          "probabilities": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "required": [
+          "type",
+          "score",
+          "probabilities",
+          "confidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "needsHuman",
+      "route",
+      "urgency"
+    ],
+    "additionalProperties": false
+  },
+  "answers": {
+    "route": {
+      "type": "choice",
+      "choice": "billing",
+      "probabilities": {
+        "billing": 0.75,
+        "technical": 0.25
+      },
+      "confidence": 0.8
+    },
+    "urgency": {
+      "type": "score",
+      "score": 1.6,
+      "probabilities": [
+        0.1,
+        0.2,
+        0.7
+      ],
+      "confidence": 0.7
+    },
+    "needsHuman": {
+      "type": "noul",
+      "probability": 0.9,
+      "confidence": 0.9,
+      "explanation": "Sensitive request"
+    }
+  }
+}

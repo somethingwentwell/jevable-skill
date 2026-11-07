@@ -1,0 +1,198 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Jevable delivers a runnable app — proposed",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "frontend": {
+          "label": "Input / viewer"
+        },
+        "backend": {
+          "label": "Workflow logic"
+        },
+        "database": {
+          "label": "Saved evidence"
+        },
+        "security": {
+          "label": "Review / policy"
+        },
+        "cloud": {
+          "label": "Container runtime"
+        },
+        "messagebus": {
+          "label": "Telemetry"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "files",
+      "label": "Files alone"
+    },
+    {
+      "id": "build",
+      "label": "Build with Jevable"
+    },
+    {
+      "id": "run",
+      "label": "Operate the app"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "source",
+      "lane": "files",
+      "col": 0,
+      "type": "frontend",
+      "label": "Generated definition",
+      "sublabel": "YAML describes behavior",
+      "width": 195
+    },
+    {
+      "id": "picture",
+      "lane": "files",
+      "col": 1,
+      "type": "frontend",
+      "label": "Static diagram",
+      "sublabel": "HTML explains behavior",
+      "width": 160
+    },
+    {
+      "id": "missing",
+      "lane": "files",
+      "col": 2,
+      "type": "external",
+      "label": "Runtime still needed",
+      "sublabel": "Files alone do not execute",
+      "width": 195
+    },
+    {
+      "id": "request",
+      "lane": "build",
+      "col": 0,
+      "type": "frontend",
+      "label": "Describe the app",
+      "sublabel": "Or bring a workflow",
+      "width": 167
+    },
+    {
+      "id": "review",
+      "lane": "build",
+      "col": 1,
+      "type": "security",
+      "label": "Review and test",
+      "sublabel": "Approve real behavior",
+      "width": 160
+    },
+    {
+      "id": "package",
+      "lane": "build",
+      "col": 2,
+      "type": "backend",
+      "label": "Runnable workflow app",
+      "sublabel": "Engine + workflow + config",
+      "width": 202
+    },
+    {
+      "id": "local",
+      "lane": "run",
+      "col": 2,
+      "type": "backend",
+      "label": "Run locally",
+      "sublabel": "Packaged runtime",
+      "width": 160
+    },
+    {
+      "id": "container",
+      "lane": "run",
+      "col": 3,
+      "type": "cloud",
+      "label": "Run a container",
+      "sublabel": "Server or Kubernetes",
+      "width": 160
+    },
+    {
+      "id": "operate",
+      "lane": "run",
+      "col": 4,
+      "type": "database",
+      "label": "Operate and observe",
+      "sublabel": "Runs · approvals · OTel",
+      "width": 188
+    }
+  ],
+  "edges": [
+    {
+      "from": "source",
+      "to": "picture"
+    },
+    {
+      "from": "picture",
+      "to": "missing"
+    },
+    {
+      "from": "request",
+      "to": "review"
+    },
+    {
+      "from": "review",
+      "to": "package"
+    },
+    {
+      "from": "package",
+      "to": "local",
+      "label": "Local"
+    },
+    {
+      "from": "package",
+      "to": "container",
+      "label": "Container"
+    },
+    {
+      "from": "local",
+      "to": "operate"
+    },
+    {
+      "from": "container",
+      "to": "operate"
+    }
+  ],
+  "mainPath": [
+    "request",
+    "review",
+    "package",
+    "container",
+    "operate"
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "The deliverable is the app",
+      "items": [
+        "Workflow execution, not just generated files",
+        "YAML is its definition; HTML is its viewer"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Choose the runtime",
+      "items": [
+        "Local execution needs no Docker",
+        "Container deployment is an explicit option"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Keep control",
+      "items": [
+        "Use configured providers and protected secrets",
+        "Release capabilities must be qualified"
+      ]
+    }
+  ]
+}

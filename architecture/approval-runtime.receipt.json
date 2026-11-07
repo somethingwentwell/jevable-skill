@@ -1,0 +1,12 @@
+{
+  "diagram_type": "workflow",
+  "output": "approval-runtime.html",
+  "specification_sha256": "08779bcb2d64c2284c9de561da84060fbdf8753ee19ac33e8245c24a08305afc",
+  "specification_bytes": 2154,
+  "artifact_sha256": "f36ec1882d742ed3861f50810d868c1f3f82c5479eeccb7f7d69b3cc2328b1b6",
+  "artifact_bytes": 705325,
+  "validation": "9/9 showcase, 0 errors, 0 warnings",
+  "visual_review": "not completed for current artifact; no browser qualification claim",
+  "correction_rounds": 2,
+  "notes": "Earlier captures were superseded by the label/legend repair and moved outside the repository. Subsequent portable-preview inspection encountered a browser-policy local-file URL rejection; no alternate browser route was used. This documentation diagram does not execute workflows."
+}

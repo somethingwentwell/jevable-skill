@@ -1,0 +1,17 @@
+import type { NotificationProjectScope } from '../notifications/project-history.ts';
+import type { projectPreviewNotificationHistory } from './notification-history.ts';
+/** One explicitly read page in memory. No polling, storage, sends, approvals or HTML interpretation. */
+export declare function liveNotificationHistoryControls(ctx: {
+    request: (command: unknown) => Promise<unknown>;
+    current: () => {
+        project: NotificationProjectScope;
+        session: string;
+    } | undefined;
+}, projectPage: typeof projectPreviewNotificationHistory): {
+    observe: () => {
+        project: NotificationProjectScope;
+        session: string;
+    } | undefined;
+    clear: () => void;
+};
+export declare const notificationHistoryHtml = "<section class=\"panel live\" id=\"notification-history\" hidden aria-label=\"Project approval notification delivery history\"><h2>Approval notification history \u00B7 read-only</h2>\n<p>Only this preview project's historical generation and revision. UUID order is not time order; pages are live reads, not one snapshot. Pending intent does not prove dispatch. HTTP acceptance is not human delivery or approval. Private review/event bodies, actors, signing keys and destination URLs are not shown; identifiers still need review before sharing.</p>\n<fieldset><legend>History filters \u00B7 applied only on Load / restart</legend><div class=\"live-grid\">\n<label for=\"notification-history-outcome\">Recorded outcome <select id=\"notification-history-outcome\"><option value=\"\">All outcomes</option><option value=\"pending\">Pending</option><option value=\"accepted\">HTTP accepted</option><option value=\"rejected\">HTTP rejected</option><option value=\"uncertain\">Uncertain</option></select></label>\n<label for=\"notification-history-event-kind\">Lifecycle kind <select id=\"notification-history-event-kind\"><option value=\"\">All lifecycle kinds</option><option value=\"requested\">Requested</option><option value=\"decided\">Decided</option><option value=\"expired\">Expired</option><option value=\"cancelled\">Cancelled</option></select></label>\n<label for=\"notification-history-created-from\">Created from \u00B7 inclusive <input id=\"notification-history-created-from\" type=\"text\" maxlength=\"24\" autocomplete=\"off\" spellcheck=\"false\" placeholder=\"2026-10-01T00:00:00.000Z\" aria-describedby=\"notification-history-filter-help\"></label>\n<label for=\"notification-history-created-before\">Created before \u00B7 exclusive <input id=\"notification-history-created-before\" type=\"text\" maxlength=\"24\" autocomplete=\"off\" spellcheck=\"false\" placeholder=\"2026-10-02T00:00:00.000Z\" aria-describedby=\"notification-history-filter-help\"></label>\n</div><p id=\"notification-history-filter-help\">Optional UTC ISO timestamps with milliseconds, ending in Z. Bounds use delivery creation time, not event time. Editing filters never reads or sends; restart to apply. No query is saved in browser storage.</p></fieldset>\n<div class=\"live-controls\"><button id=\"notification-history-load\" disabled>Load / restart history</button><button id=\"notification-history-next\" disabled>Read next page</button><button id=\"notification-history-clear\" disabled>Clear displayed history</button></div>\n<p id=\"notification-history-message\" role=\"status\" aria-live=\"polite\"></p><p id=\"notification-history-summary\"></p><div id=\"notification-history-records\"></div></section>";

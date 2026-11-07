@@ -1,0 +1,6 @@
+export { buildReleaseImage, saveReleaseImage, inspectImageReceipt } from './service.ts';
+export type { ImageBuildOptions, ImageReceipt } from './service.ts';
+export { ImageError } from './docker.ts';
+export type { ImageBuildRecovery } from './docker.ts';
+export { buildManagementImage, saveManagementImage, inspectManagementImageReceipt } from './management.ts';
+export type { ManagementImageReceipt } from './management.ts';

@@ -1,0 +1,56 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: native-triage
+  name: Native typed triage
+spec:
+  inputSchema: {type: string}
+  nodes:
+    start:
+      type: trigger
+      config: {modes: [manual]}
+    judge:
+      type: decision
+      config:
+        provider: jev
+        model: your-explicit-model-id
+        answerFormat: systemone-v1
+        connection: {mode: workspace, id: native-decisions}
+        state: "${{ inputs }}"
+        execution: {timeoutSeconds: 20, maxAttempts: 1}
+        questions:
+          team:
+            type: choice
+            instructions: Which team should handle this?
+            criteria: {billing: Invoices, support: Product help}
+          urgency:
+            type: score
+            instructions: How urgent is it?
+            criteria: [Routine, Soon, Immediate]
+          review:
+            type: noul
+            instructions: Does a person need to review this?
+    route:
+      type: rule
+      config:
+        mode: ifElse
+        condition: "${{ nodes.judge.output.review.noul >= 0.5 }}"
+    review:
+      type: humanApproval
+      config:
+        title: Review the native decision
+        input: "${{ nodes.judge.output }}"
+        inputSchema: {type: object}
+        actions: [approve, reject]
+        expiresAfter: 1h
+        onReject: cancelled
+        onTimeout: expired
+    result:
+      type: output
+      config: {value: "${{ nodes.judge.output }}"}
+  edges:
+    - {from: start, to: judge}
+    - {from: judge, to: route}
+    - {from: route, port: 'true', to: review}
+    - {from: route, port: 'false', to: result}
+    - {from: review, port: approve, to: result}

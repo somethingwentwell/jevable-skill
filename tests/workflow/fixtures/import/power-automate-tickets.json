@@ -1,0 +1,84 @@
+{
+  "name": "3f1c9a52-7d0e-4b8a-9d61-2f4e5c6b7a80",
+  "id": "/providers/Microsoft.Flow/flows/3f1c9a52-7d0e-4b8a-9d61-2f4e5c6b7a80",
+  "type": "Microsoft.Flow/flows",
+  "properties": {
+    "apiId": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+    "displayName": "Ticket replies",
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": { "defaultValue": {}, "type": "Object" },
+        "$authentication": { "defaultValue": {}, "type": "SecureObject" }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": { "title": "Message", "type": "string", "x-ms-dynamically-added": true },
+                "text_1": { "title": "Priority", "type": "string", "x-ms-dynamically-added": true }
+              },
+              "required": ["text", "text_1"]
+            }
+          }
+        }
+      },
+      "actions": {
+        "Check_priority": {
+          "type": "If",
+          "runAfter": {},
+          "expression": { "and": [{ "equals": ["@triggerBody()?['text_1']", "high"] }] },
+          "actions": {
+            "Draft_reply": {
+              "type": "OpenApiConnection",
+              "runAfter": {},
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_azureopenai",
+                  "connectionName": "shared_azureopenai",
+                  "operationId": "ChatCompletions_Create"
+                },
+                "parameters": { "deployment-id": "gpt-4o", "prompt": "Write an urgent reply to: @{triggerBody()?['text']}" }
+              }
+            },
+            "Reply": { "type": "Compose", "runAfter": { "Draft_reply": ["Succeeded"] }, "inputs": "@{body('Draft_reply')}" }
+          },
+          "else": {
+            "actions": {
+              "Send_an_email": {
+                "type": "OpenApiConnection",
+                "runAfter": {},
+                "inputs": {
+                  "host": {
+                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                    "connectionName": "shared_office365",
+                    "operationId": "SendEmailV2"
+                  },
+                  "parameters": {
+                    "emailMessage/To": "support@example.com",
+                    "emailMessage/Subject": "New ticket",
+                    "emailMessage/Body": "<p>@{triggerBody()?['text']}</p>"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Notify_on_failure": { "type": "Compose", "runAfter": { "Check_priority": ["Failed", "TimedOut"] }, "inputs": "The flow failed." }
+      }
+    },
+    "connectionReferences": {
+      "shared_office365": {
+        "connectionName": "shared-office365-4f1d2c",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+        "tier": "NotSpecified"
+      }
+    }
+  }
+}

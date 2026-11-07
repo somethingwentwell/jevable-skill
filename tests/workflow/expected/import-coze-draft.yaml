@@ -1,0 +1,70 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: topic-writer
+  name: Topic writer
+extensions:
+  jevable.ai/import:
+    format: coze
+    version: 1.0.0
+    fidelity: unsupported
+    sourceSha256: e48d6ea51d85e96014a07b6d0dd3137ca4a3727aec79ae3f42ed506c6c00f070
+spec:
+  inputSchema:
+    type: object
+    properties:
+      topic:
+        type: string
+      words:
+        type: integer
+    required:
+      - topic
+  nodes:
+    start:
+      type: trigger
+      config:
+        modes:
+          - manual
+      title: 开始
+    Draft:
+      type: llm
+      config:
+        provider: choose-provider
+        model: demo-model
+        connection:
+          mode: workspace
+          id: choose-an-allowed-model
+        prompt: Write about ${{ inputs.topic }} in ${{ inputs.words }} words.
+        responseFormat: text
+        generation:
+          maxTokens: 1024
+          stream: true
+        historyScope: none
+        execution:
+          timeoutSeconds: 60
+          maxAttempts: 1
+      title: Draft
+    http:
+      type: custom
+      description: Imported from Coze node type http; convert it by hand.
+      config:
+        language: javascript
+        code: ""
+        input: {}
+        outputSchema:
+          type: object
+      title: 发送
+    End:
+      type: output
+      config:
+        value:
+          text: ${{ nodes.Draft.output }}
+          source: coze
+      title: End
+  edges:
+    - from: start
+      to: Draft
+    - from: Draft
+      to: http
+    - from: http
+      to: End

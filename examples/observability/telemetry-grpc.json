@@ -1,0 +1,14 @@
+{
+  "protocol": "grpc",
+  "endpoint": "http://127.0.0.1:4317",
+  "metricsEndpoint": "http://127.0.0.1:4317",
+  "logsEndpoint": "http://127.0.0.1:4317",
+  "authentication": { "kind": "none" },
+  "serviceName": "jevable-workflow-runtime",
+  "environment": "local",
+  "httpRequests": true,
+  "exporterMetrics": true,
+  "retainedStateMetrics": true,
+  "intervalMs": 1000,
+  "sampleRatio": 1
+}

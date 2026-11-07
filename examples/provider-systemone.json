@@ -1,0 +1,11 @@
+{
+  "id": "native-decisions",
+  "provider": "jev",
+  "protocol": "systemone",
+  "endpoint": "https://api.typesafe.ai/v1",
+  "allowedModels": ["your-explicit-model-id"],
+  "authentication": { "kind": "bearer", "credentialRef": "models/native" },
+  "maxRequestBytes": 1000000,
+  "maxResponseBytes": 1000000,
+  "maxTimeoutSeconds": 60
+}

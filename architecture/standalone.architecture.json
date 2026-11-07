@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "Jevable workflow runtime — local / Docker (proposed)", "locale": "en", "quality_profile": "showcase", "viewBox": [1390, 690] },
+  "components": [
+    { "id": "agent", "type": "frontend", "label": "Your agent", "sublabel": "Describe and review", "pos": [50, 110], "size": [180, 76] },
+    { "id": "cli", "type": "backend", "label": "Skill + CLI", "sublabel": "YAML · versioned commands", "pos": [360, 110], "size": [210, 76] },
+    { "id": "runtime", "type": "backend", "label": "Jevable workflow runtime", "sublabel": "Review · run · Jev · debug", "pos": [710, 110], "size": [220, 76] },
+    { "id": "providers", "type": "external", "label": "Model providers", "sublabel": "Configured Jev / LLM routes", "pos": [1120, 110], "size": [240, 76] },
+    { "id": "preview", "type": "frontend", "label": "HTML test viewer", "sublabel": "Inputs · approvals · results", "pos": [360, 355], "size": [210, 76] },
+    { "id": "journal", "type": "database", "label": "Private run journal", "sublabel": "Revisions · attempts · audit", "pos": [710, 355], "size": [220, 76] },
+    { "id": "collector", "type": "backend", "label": "OTel Collector", "sublabel": "Traces · metrics · logs", "pos": [1120, 355], "size": [240, 76] },
+    { "id": "backends", "type": "external", "label": "Telemetry backends", "sublabel": "Dashboards · traces · alerts", "pos": [1120, 555], "size": [240, 76] }
+  ],
+  "connections": [
+    { "from": "agent", "to": "cli", "label": "Invoke" },
+    { "from": "cli", "to": "runtime", "label": "Authenticated API" },
+    { "from": "runtime", "to": "providers", "label": "Model request" },
+    { "from": "cli", "to": "preview", "label": "Serve preview", "labelAt": [465, 200] },
+    { "from": "preview", "to": "runtime", "label": "Test / inspect" },
+    { "from": "runtime", "to": "journal", "label": "Durable commit", "labelAt": [820, 200] },
+    { "from": "runtime", "to": "collector", "label": "OTLP", "variant": "dashed" },
+    { "from": "collector", "to": "backends", "label": "Export", "variant": "dashed", "labelAt": [1240, 445] }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Local first", "items": ["Packaged process; Docker optional", "Portable HTML opens without a server"] },
+    { "dot": "emerald", "title": "Traceable work", "items": ["Revision → run → node → attempt", "Approval and result survive restart"] },
+    { "dot": "violet", "title": "Optional telemetry", "items": ["Journal stays authoritative", "Payload export requires opt-in"] }
+  ]
+}

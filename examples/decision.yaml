@@ -1,0 +1,57 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: triage
+  name: Typed triage
+spec:
+  inputSchema:
+    type: string
+  nodes:
+    start:
+      type: trigger
+      config:
+        modes: [manual]
+    judge:
+      type: decision
+      config:
+        provider: laya
+        model: registered-model
+        connection:
+          mode: workspace
+          id: local-decisions
+        state: "${{ inputs }}"
+        execution:
+          timeoutSeconds: 20
+          maxAttempts: 1
+        questions:
+          route:
+            type: choice
+            instructions: Which team?
+            criteria:
+              billing: Payments
+              technical: Bugs
+          urgency:
+            type: score
+            instructions: How urgent?
+            criteria: [Routine, Soon, Immediate]
+          needsHuman:
+            type: noul
+            instructions: Does this need review?
+    choose:
+      type: rule
+      config:
+        mode: ifElse
+        condition: "${{ nodes.judge.output.needsHuman.probability >= 0.65 }}"
+    review:
+      type: output
+      config:
+        value: "${{ nodes.judge.output.route.choice }}"
+    normal:
+      type: output
+      config:
+        value: "${{ nodes.judge.output.urgency.score }}"
+  edges:
+    - {from: start, to: judge}
+    - {from: judge, to: choose}
+    - {from: choose, port: 'true', to: review}
+    - {from: choose, port: 'false', to: normal}

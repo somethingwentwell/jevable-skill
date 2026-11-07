@@ -1,0 +1,167 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Judgment without free-text plumbing",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "frontend": {
+          "label": "Input / viewer"
+        },
+        "backend": {
+          "label": "Workflow logic"
+        },
+        "database": {
+          "label": "Saved evidence"
+        },
+        "security": {
+          "label": "Review / policy"
+        },
+        "cloud": {
+          "label": "Container runtime"
+        },
+        "messagebus": {
+          "label": "Telemetry"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "text",
+      "label": "Free-text pattern · input"
+    },
+    {
+      "id": "parsing",
+      "label": "Free-text pattern · interpretation and routing"
+    },
+    {
+      "id": "jev",
+      "label": "Decision (Jev) · typed judgment and routing"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "prompt",
+      "lane": "text",
+      "col": 0,
+      "type": "backend",
+      "label": "Prompt an LLM",
+      "sublabel": "Ask for a classification",
+      "width": 160
+    },
+    {
+      "id": "parse",
+      "lane": "parsing",
+      "col": 1,
+      "type": "backend",
+      "label": "Parse the response",
+      "sublabel": "Extract a label",
+      "width": 181
+    },
+    {
+      "id": "check",
+      "lane": "parsing",
+      "col": 2,
+      "type": "security",
+      "label": "Check and repair",
+      "sublabel": "Handle unclear output",
+      "width": 167
+    },
+    {
+      "id": "route",
+      "lane": "parsing",
+      "col": 3,
+      "type": "backend",
+      "label": "Route the workflow",
+      "sublabel": "Apply branch conditions",
+      "width": 181
+    },
+    {
+      "id": "decision",
+      "lane": "jev",
+      "col": 0,
+      "type": "backend",
+      "label": "Decision (Jev)",
+      "sublabel": "Typed answer + confidence",
+      "width": 160
+    },
+    {
+      "id": "rule",
+      "lane": "jev",
+      "col": 1,
+      "type": "backend",
+      "label": "Rule",
+      "sublabel": "Use answer and confidence",
+      "width": 160
+    },
+    {
+      "id": "next",
+      "lane": "jev",
+      "col": 3,
+      "type": "backend",
+      "label": "Next permitted step",
+      "sublabel": "Continue or request review",
+      "width": 188
+    }
+  ],
+  "edges": [
+    {
+      "from": "prompt",
+      "to": "parse",
+      "route": "drop",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "parse",
+      "to": "check"
+    },
+    {
+      "from": "check",
+      "to": "route"
+    },
+    {
+      "from": "decision",
+      "to": "rule"
+    },
+    {
+      "from": "rule",
+      "to": "next"
+    }
+  ],
+  "mainPath": [
+    "decision",
+    "rule",
+    "next"
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Less parsing logic",
+      "items": [
+        "Declared choice, score, or yes/no output",
+        "No custom free-text label extraction"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Explicit uncertainty",
+      "items": [
+        "Rules can send low confidence to review",
+        "Confidence is not a correctness guarantee"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "A pattern comparison",
+      "items": [
+        "Not a benchmark or a claim about every LLM",
+        "Structured-output LLMs can also reduce parsing"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Trace a run through approval and recovery — proposed",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "frontend": {
+          "label": "Input / viewer"
+        },
+        "backend": {
+          "label": "Workflow logic"
+        },
+        "database": {
+          "label": "Saved evidence"
+        },
+        "security": {
+          "label": "Review / policy"
+        },
+        "cloud": {
+          "label": "Container runtime"
+        },
+        "messagebus": {
+          "label": "Telemetry"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "work",
+      "label": "Durable execution"
+    },
+    {
+      "id": "wait",
+      "label": "Approval boundary"
+    },
+    {
+      "id": "signals",
+      "label": "Observability"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "revision",
+      "lane": "work",
+      "col": 0,
+      "type": "database",
+      "label": "Approved revision",
+      "sublabel": "Hash + release identity",
+      "width": 174
+    },
+    {
+      "id": "attempt",
+      "lane": "work",
+      "col": 1,
+      "type": "backend",
+      "label": "Run and node attempt",
+      "sublabel": "Run ID · node ID · attempt ID",
+      "width": 195
+    },
+    {
+      "id": "decision",
+      "lane": "work",
+      "col": 2,
+      "type": "database",
+      "label": "Decision and branch",
+      "sublabel": "Typed answer + Rule outcome",
+      "width": 188
+    },
+    {
+      "id": "waiting",
+      "lane": "wait",
+      "col": 2,
+      "type": "security",
+      "label": "Saved approval wait",
+      "sublabel": "Checkpoint + evidence",
+      "width": 188
+    },
+    {
+      "id": "resume",
+      "lane": "wait",
+      "col": 3,
+      "type": "backend",
+      "label": "Authorized resume",
+      "sublabel": "Same run; new linked segment",
+      "width": 174
+    },
+    {
+      "id": "result",
+      "lane": "wait",
+      "col": 4,
+      "type": "database",
+      "label": "Retained result",
+      "sublabel": "Outcome + audit references",
+      "width": 160
+    },
+    {
+      "id": "otel",
+      "lane": "signals",
+      "col": 1,
+      "type": "messagebus",
+      "label": "OpenTelemetry",
+      "sublabel": "Redacted traces · metrics · logs",
+      "width": 180
+    },
+    {
+      "id": "backend",
+      "lane": "signals",
+      "col": 3,
+      "type": "external",
+      "label": "Observe service health",
+      "sublabel": "Latency · errors · export drops",
+      "width": 209
+    }
+  ],
+  "edges": [
+    {
+      "from": "revision",
+      "to": "attempt"
+    },
+    {
+      "from": "attempt",
+      "to": "decision"
+    },
+    {
+      "from": "decision",
+      "to": "waiting",
+      "label": "Review path"
+    },
+    {
+      "from": "waiting",
+      "to": "resume",
+      "label": "Approve"
+    },
+    {
+      "from": "resume",
+      "to": "result"
+    },
+    {
+      "from": "attempt",
+      "to": "otel",
+      "label": "Instrument"
+    },
+    {
+      "from": "otel",
+      "to": "backend",
+      "label": "OTLP"
+    }
+  ],
+  "mainPath": [
+    "revision",
+    "attempt",
+    "decision",
+    "waiting",
+    "resume",
+    "result"
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Journal is the source of truth",
+      "items": [
+        "Persist run, decisions, and approval evidence",
+        "Waiting state survives qualified recovery"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Telemetry is a diagnostic view",
+      "items": [
+        "Link resumed spans without a days-long span",
+        "Export failures never trigger a workflow retry"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Scope of this path",
+      "items": [
+        "Shows approval success; rejection is retained too",
+        "Metric labels exclude per-run identity"
+      ]
+    }
+  ]
+}

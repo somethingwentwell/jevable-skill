@@ -1,0 +1,20 @@
+{
+  "name": "Review articles",
+  "nodes": [
+    { "id": "1", "name": "Start", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "parameters": {} },
+    { "id": "2", "name": "Loop Over Items", "type": "n8n-nodes-base.splitInBatches", "typeVersion": 3, "parameters": { "options": {} } },
+    { "id": "3", "name": "Is long?", "type": "n8n-nodes-base.if", "typeVersion": 2, "parameters": { "conditions": {
+      "combinator": "and", "conditions": [
+        { "leftValue": "={{ $json.words }}", "rightValue": 500, "operator": { "type": "number", "operation": "gt" } }
+      ] } } },
+    { "id": "4", "name": "Summarize", "type": "@n8n/n8n-nodes-langchain.chainLlm", "typeVersion": 1,
+      "parameters": { "text": "=Summarize {{ $('Loop Over Items').item.json.text }}" } },
+    { "id": "5", "name": "Report", "type": "n8n-nodes-base.code", "typeVersion": 2, "parameters": { "jsCode": "return $input.all()" } }
+  ],
+  "connections": {
+    "Start": { "main": [[ { "node": "Loop Over Items", "type": "main", "index": 0 } ]] },
+    "Loop Over Items": { "main": [[ { "node": "Report", "type": "main", "index": 0 } ], [ { "node": "Is long?", "type": "main", "index": 0 } ]] },
+    "Is long?": { "main": [[ { "node": "Summarize", "type": "main", "index": 0 } ], [ { "node": "Loop Over Items", "type": "main", "index": 0 } ]] },
+    "Summarize": { "main": [[ { "node": "Loop Over Items", "type": "main", "index": 0 } ]] }
+  }
+}

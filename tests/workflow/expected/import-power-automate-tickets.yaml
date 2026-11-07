@@ -1,0 +1,86 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: ticket-replies
+  name: Ticket replies
+extensions:
+  jevable.ai/import:
+    format: power-automate
+    version: 2016-06-01
+    fidelity: unsupported
+    sourceSha256: a6d4e0258aaa0df6a43241f025c0ff38f2da360662286eb72b986ee3a2f4fb94
+spec:
+  inputSchema:
+    type: object
+    properties:
+      text_1:
+        type: string
+      text:
+        type: string
+    required:
+      - text_1
+      - text
+  nodes:
+    manual:
+      type: trigger
+      config:
+        modes:
+          - manual
+      title: manual
+    Check_priority:
+      type: rule
+      config:
+        mode: ifElse
+        condition: ${{ inputs.text_1 == "high" }}
+      title: Check priority
+    Draft_reply:
+      type: llm
+      config:
+        provider: openai
+        model: gpt-4o
+        connection:
+          mode: workspace
+          id: choose-an-allowed-model
+        prompt: "Write an urgent reply to: ${{ inputs.text }}"
+        responseFormat: text
+        generation:
+          maxTokens: 1024
+          stream: true
+        historyScope: none
+        execution:
+          timeoutSeconds: 60
+          maxAttempts: 1
+      title: Draft reply
+    Reply:
+      type: output
+      config:
+        value: ${{ nodes.Draft_reply.output }}
+      title: Reply
+    Send_an_email:
+      type: custom
+      description: Connect this app step through a supported step.
+      config:
+        language: javascript
+        code: ""
+        input: {}
+        outputSchema:
+          type: object
+      title: Send an email
+    Send_an_email_result:
+      type: output
+      title: Result
+      config:
+        value: ${{ nodes.Send_an_email.output }}
+  edges:
+    - from: manual
+      to: Check_priority
+    - from: Check_priority
+      to: Draft_reply
+      port: "true"
+    - from: Draft_reply
+      to: Reply
+    - from: Check_priority
+      to: Send_an_email
+      port: "false"
+    - from: Send_an_email
+      to: Send_an_email_result

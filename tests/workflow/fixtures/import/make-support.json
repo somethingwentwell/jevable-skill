@@ -1,0 +1,15 @@
+{
+  "name": "Ticket summaries",
+  "flow": [
+    { "id": 1, "module": "gateway:CustomWebHook", "version": 1, "parameters": { "hook": 11 }, "mapper": {} },
+    { "id": 2, "module": "openai-gpt-3:CreateCompletion", "version": 1,
+      "filter": { "name": "Open tickets", "conditions": [[{ "a": "{{1.status}}", "b": "open", "o": "text:equal" }]] },
+      "mapper": { "model": "gpt-4o", "messages": [{ "role": "user", "content": "Summarize {{1.message}} for {{1.customer.name}}." }] } },
+    { "id": 3, "module": "builtin:BasicRouter", "version": 1, "routes": [
+      { "flow": [ { "id": 4, "module": "slack:CreateMessage", "version": 4, "mapper": { "text": "{{2.result}}" } } ] },
+      { "flow": [ { "id": 5, "module": "email:ActionSendEmail", "version": 7, "mapper": {} } ] }
+    ] },
+    { "id": 6, "module": "code:ExecuteCode", "version": 1, "filter": { "name": "Big", "conditions": [[{ "a": "{{1.size}}", "b": "10", "o": "number:greater" }, { "a": "{{1.size}}", "b": "99", "o": "number:less" }]] }, "mapper": {} }
+  ],
+  "metadata": { "version": 1, "designer": { "orphans": [] } }
+}

@@ -1,0 +1,174 @@
+{
+  "name": "@jevable/core",
+  "version": "0.1.0-alpha.1",
+  "description": "Jevable workflow compiler, runtime SDK and agent CLI",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "bin": {
+    "jevable": "bin/jevable.mjs"
+  },
+  "exports": {
+    "./http/postgres-rate-limits": {
+      "types": "./dist/http/postgres-rate-limits.d.ts",
+      "import": "./dist/http/postgres-rate-limits.js"
+    },
+    "./account": {
+      "types": "./dist/account/index.d.ts",
+      "import": "./dist/account/index.js"
+    },
+    "./storage/configuration": {
+      "types": "./dist/storage/postgres-config.d.ts",
+      "import": "./dist/storage/postgres-config.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts.d.ts",
+      "import": "./dist/contracts.js"
+    },
+    "./packages": {
+      "types": "./dist/packages/index.d.ts",
+      "import": "./dist/packages/index.js"
+    },
+    "./providers/systemone": {
+      "types": "./dist/providers/systemone.d.ts",
+      "import": "./dist/providers/systemone.js"
+    },
+    "./evidence": {
+      "types": "./dist/evidence/index.d.ts",
+      "import": "./dist/evidence/index.js"
+    },
+    "./docker": {
+      "types": "./dist/docker/index.d.ts",
+      "import": "./dist/docker/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "import": "./dist/testing/index.js"
+    },
+    "./deployment": {
+      "types": "./dist/deployment/index.d.ts",
+      "import": "./dist/deployment/index.js"
+    },
+    "./http/postgres": {
+      "types": "./dist/http/postgres.d.ts",
+      "import": "./dist/http/postgres.js"
+    },
+    "./storage": {
+      "types": "./dist/storage/index.d.ts",
+      "import": "./dist/storage/index.js"
+    },
+    "./images": {
+      "types": "./dist/images/index.d.ts",
+      "import": "./dist/images/index.js"
+    },
+    "./telemetry": {
+      "types": "./dist/telemetry/index.d.ts",
+      "import": "./dist/telemetry/index.js"
+    },
+    "./releases": {
+      "types": "./dist/releases/index.d.ts",
+      "import": "./dist/releases/index.js"
+    },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./workflow": {
+      "types": "./dist/workflow/index.d.ts",
+      "import": "./dist/workflow/index.js"
+    },
+    "./templates": {
+      "types": "./dist/templates/index.d.ts",
+      "import": "./dist/templates/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js"
+    },
+    "./preview": {
+      "types": "./dist/preview/index.d.ts",
+      "import": "./dist/preview/index.js"
+    },
+    "./http": {
+      "types": "./dist/http/index.d.ts",
+      "import": "./dist/http/index.js"
+    }
+  },
+  "files": [
+    ".env.example",
+    "bin",
+    "dist",
+    "SKILL.md",
+    "agents/openai.yaml",
+    "assets/full-delivery.gif",
+    "assets/import-preview.gif",
+    "assets/import-to-app.gif",
+    "assets/saved-tests-approval.gif",
+    "assets/support-triage.gif",
+    "references",
+    "examples",
+    "notices",
+    "architecture/README.md",
+    "architecture/*.architecture.json",
+    "architecture/*.workflow.json",
+    "architecture/*.visual-check.*.png",
+    "architecture/*.visual-check.html",
+    "architecture/standalone.html",
+    "architecture/kubernetes.html",
+    "architecture/app-delivery.html",
+    "architecture/jev-comparison.html",
+    "architecture/triage.html",
+    "architecture/traceability.html",
+    "architecture/approval-runtime.html",
+    "README.md"
+  ],
+  "scripts": {
+    "build:preview": "node scripts/build-preview-workspace.mjs",
+    "pretest": "npm run build:preview",
+    "pretypecheck": "npm run build:preview",
+    "build": "npm run build:preview && tsc -p tsconfig.build.json && node scripts/build-release-runtime.mjs && node scripts/build-sqlite-coordinated-runtime.mjs",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.ui.json",
+    "test": "vitest run",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "1.9.0",
+    "@opentelemetry/api-logs": "0.222.0",
+    "@opentelemetry/otlp-transformer": "0.222.0",
+    "@opentelemetry/resources": "2.11.0",
+    "@opentelemetry/sdk-logs": "0.222.0",
+    "@opentelemetry/sdk-metrics": "2.11.0",
+    "@opentelemetry/sdk-trace": "2.11.0",
+    "acorn": "8.17.0",
+    "ajv": "8.20.0",
+    "eventsource-parser": "3.0.6",
+    "fflate": "0.8.3",
+    "pg": "8.23.0",
+    "pg-connection-string": "2.14.0",
+    "pg-protocol": "1.16.0",
+    "yaml": "2.9.0",
+    "yauzl": "3.4.0",
+    "zod": "4.4.3"
+  },
+  "optionalDependencies": {
+    "pg-cloudflare": "1.4.0"
+  },
+  "devDependencies": {
+    "@tabler/icons-react": "3.35.0",
+    "@types/jsdom": "21.1.7",
+    "@types/node": "^22.19.0",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@types/yauzl": "2.10.3",
+    "esbuild": "0.28.2",
+    "jsdom": "26.1.0",
+    "motion": "12.23.24",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.0"
+  }
+}

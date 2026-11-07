@@ -1,0 +1,116 @@
+apiVersion: jevable.ai/v1alpha1
+kind: Workflow
+metadata:
+  id: imported-coze-workflow
+  name: Imported Coze workflow
+extensions:
+  jevable.ai/import:
+    format: coze
+    version: canvas
+    fidelity: unsupported
+    sourceSha256: 3ee764b7a2afbe50eaa4ea9caae6c183cf77bffa1ba01e998355553e4b9aa7bf
+spec:
+  inputSchema:
+    type: object
+    properties:
+      message:
+        type: string
+      items:
+        type: array
+        items:
+          type: string
+    required:
+      - message
+  nodes:
+    Start:
+      type: trigger
+      config:
+        modes:
+          - manual
+      title: Start
+    Route:
+      type: decision
+      config:
+        provider: llm
+        model: demo-model
+        llm:
+          provider: choose-provider
+          generation:
+            maxTokens: 400
+            stream: true
+        connection:
+          mode: workspace
+          id: choose-an-allowed-model
+        state: ${{ inputs.message }}
+        execution:
+          timeoutSeconds: 60
+          maxAttempts: 1
+        questions:
+          intent:
+            type: choice
+            instructions: Which of these intents does the input express?
+            criteria:
+              branch_0: Process the list
+              branch_1: Small talk
+              default: None of the intents above
+      title: Route
+    Route_route:
+      type: rule
+      title: Route →
+      config:
+        mode: switch
+        value: ${{ nodes.Route.output.intent.choice }}
+        cases:
+          - value: branch_0
+            port: branch_0
+          - value: branch_1
+            port: branch_1
+    For_each_item:
+      type: custom
+      description: Imported from a Coze loop node; rebuild it as a Loop step.
+      config:
+        language: javascript
+        code: ""
+        input: {}
+        outputSchema:
+          type: object
+      title: For each item
+    Chat_reply:
+      type: custom
+      description: Imported from a Coze message node in the middle of a path; rebuild
+        it by hand.
+      config:
+        language: javascript
+        code: ""
+        input: {}
+        outputSchema:
+          type: object
+      title: Chat reply
+    End:
+      type: output
+      config:
+        value: "Done: ${{ nodes.For_each_item.output.upper_list }}"
+      title: End
+    For_each_item_result:
+      type: output
+      title: Result
+      config:
+        value: ${{ nodes.For_each_item.output }}
+  edges:
+    - from: Route
+      to: Route_route
+    - from: Start
+      to: Route
+    - from: Route_route
+      to: For_each_item
+      port: branch_0
+    - from: Route_route
+      to: Chat_reply
+      port: branch_1
+    - from: Route_route
+      to: Chat_reply
+      port: default
+    - from: Chat_reply
+      to: End
+    - from: For_each_item
+      to: For_each_item_result

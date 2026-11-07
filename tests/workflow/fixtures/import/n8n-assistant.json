@@ -1,0 +1,24 @@
+{
+  "name": "Reply assistant",
+  "nodes": [
+    { "id": "1", "name": "Webhook", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "parameters": { "path": "reply" } },
+    { "id": "2", "name": "Write reply", "type": "@n8n/n8n-nodes-langchain.chainLlm", "typeVersion": 1.4,
+      "parameters": { "text": "=Reply politely to {{ $json.message }} from {{ $json.customer.name }}" } },
+    { "id": "3", "name": "OpenAI Chat Model", "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi", "typeVersion": 1, "parameters": {} },
+    { "id": "4", "name": "Format", "type": "n8n-nodes-base.code", "typeVersion": 2, "parameters": { "jsCode": "return items" } },
+    { "id": "5", "name": "Send email", "type": "n8n-nodes-base.gmail", "typeVersion": 2, "parameters": {} },
+    { "id": "6", "name": "Log", "type": "n8n-nodes-base.set", "typeVersion": 3, "parameters": {} },
+    { "id": "7", "name": "Old filter", "type": "n8n-nodes-base.if", "typeVersion": 1, "parameters": {} },
+    { "id": "8", "name": "Schedule", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1, "parameters": {} },
+    { "id": "9", "name": "Python", "type": "n8n-nodes-base.code", "typeVersion": 2, "parameters": { "language": "python", "pythonCode": "x" } },
+    { "id": "10", "name": "Disabled", "type": "n8n-nodes-base.set", "typeVersion": 3, "parameters": {}, "disabled": true }
+  ],
+  "connections": {
+    "Webhook": { "main": [[ { "node": "Write reply", "type": "main", "index": 0 } ]] },
+    "OpenAI Chat Model": { "ai_languageModel": [[ { "node": "Write reply", "type": "ai_languageModel", "index": 0 } ]] },
+    "Write reply": { "main": [[ { "node": "Format", "type": "main", "index": 0 }, { "node": "Log", "type": "main", "index": 0 } ]] },
+    "Format": { "main": [[ { "node": "Send email", "type": "main", "index": 0 } ]] },
+    "Schedule": { "main": [[ { "node": "Webhook", "type": "main", "index": 0 } ]] },
+    "Missing": { "main": [[ { "node": "Format", "type": "main", "index": 0 } ]] }
+  }
+}

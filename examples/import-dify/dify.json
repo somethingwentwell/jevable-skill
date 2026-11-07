@@ -1,0 +1,122 @@
+{
+ "version": "0.1.5",
+ "app": {
+  "name": "If select",
+  "mode": "advanced-chat"
+ },
+ "workflow": {
+  "graph": {
+   "nodes": [
+    {
+     "id": "s",
+     "data": {
+      "type": "start",
+      "title": "Start",
+      "variables": [
+       {
+        "variable": "grade",
+        "label": "G",
+        "type": "select",
+        "required": true,
+        "options": [
+         "gold",
+         "basic"
+        ]
+       }
+      ]
+     },
+     "position": {
+      "x": 0,
+      "y": 0
+     }
+    },
+    {
+     "id": "g",
+     "data": {
+      "type": "if-else",
+      "title": "Gate",
+      "cases": [
+       {
+        "case_id": "true",
+        "conditions": [
+         {
+          "variable_selector": [
+           "s",
+           "grade"
+          ],
+          "comparison_operator": "is",
+          "value": "gold"
+         }
+        ],
+        "logical_operator": "and"
+       }
+      ]
+     },
+     "position": {
+      "x": 0,
+      "y": 0
+     }
+    },
+    {
+     "id": "t",
+     "data": {
+      "type": "end",
+      "title": "True end",
+      "outputs": [
+       {
+        "variable": "r",
+        "value_selector": [
+         "s",
+         "grade"
+        ]
+       }
+      ]
+     },
+     "position": {
+      "x": 0,
+      "y": 0
+     }
+    },
+    {
+     "id": "f",
+     "data": {
+      "type": "end",
+      "title": "False end",
+      "outputs": [
+       {
+        "variable": "r",
+        "value_selector": [
+         "s",
+         "grade"
+        ]
+       }
+      ]
+     },
+     "position": {
+      "x": 0,
+      "y": 0
+     }
+    }
+   ],
+   "edges": [
+    {
+     "id": "e1",
+     "source": "s",
+     "target": "g"
+    },
+    {
+     "id": "e2",
+     "source": "g",
+     "target": "t",
+     "sourceHandle": "true"
+    },
+    {
+     "id": "e3",
+     "source": "g",
+     "target": "f",
+     "sourceHandle": "false"
+    }
+   ]
+  }
+ }
+}

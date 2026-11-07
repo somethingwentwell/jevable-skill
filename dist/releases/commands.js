@@ -1,0 +1,66 @@
+export const releaseAppCommands = {
+    info: { strings: [], description: 'Verify and report package identity and available commands; no storage or execution.' },
+    token: { strings: ['output'], required: ['output'], description: 'Create a private service token at a fresh path; never display its value.' },
+    'reviewer-token': { strings: ['id', 'output'], required: ['id', 'output'], description: 'Prepare one private reviewer grant token at a fresh path; prints only its ID and digest. The owner must issue it separately for one approval attempt.' },
+    serve: { strings: ['token-file', 'port', 'public-origin', 'bind-address', 'tls-cert-file', 'tls-key-file', 'notifications-file', 'async-concurrency', 'rate-limits-file', 'webhooks-file'], booleans: ['reviewer-decisions'], required: ['token-file'], description: 'Own this release state in a foreground authenticated service; startup never runs a workflow. Optional --reviewer-decisions enables exact-release delegated approval routes. Optional --async-concurrency 1..64 enables bounded owner async admission; omission disables it. Optional --rate-limits-file configures instance-local request/control token buckets; no distributed quota or automatic retry. Optional --webhooks-file selects a private source/signing-key configuration for start-only Standard Webhooks v1 intake; requires api entry and explicit shared async capacity.' },
+    status: { strings: ['token-file', 'endpoint', 'ca-file'], required: ['token-file', 'endpoint'], description: 'Read health from the explicitly selected exact-release service without opening storage.' },
+    request: { strings: ['token-file', 'endpoint', 'timeout-ms', 'ca-file'], positional: 'operation.json', required: ['token-file', 'endpoint'], description: 'Submit the reviewed JSON operation to that service; exit 0 is HTTP success, not workflow completion.' },
+    submit: { strings: ['token-file', 'endpoint', 'instance-id', 'timeout-ms', 'ca-file', 'trace-context-file'], positional: 'retained-start.json', required: ['token-file', 'endpoint', 'instance-id'], description: 'Submit a strict kind=release retained UUID/input/pin file to the explicitly enabled exact-release service. This app supplies its own immutable release scope; exit 0 means admission/observation, not completion. No retry or local owner is opened.' },
+    observe: { strings: ['token-file', 'endpoint', 'instance-id', 'timeout-ms', 'ca-file'], positional: 'run-uuid', required: ['token-file', 'endpoint', 'instance-id'], description: 'Read metadata only through this app’s immutable release/hash and reviewed instance pin. No output, execution, automatic polling, reconnect or local owner.' },
+    check: { strings: ['trigger-mode'], description: 'Check configured readiness for the default local or explicit api contract without contacting a model provider or executing.' },
+    run: { strings: ['input', 'id', 'trigger-mode'], required: ['input', 'id'], booleans: ['paused'], description: 'Execute the pinned workflow using a retained run UUID and optional explicit api trigger mode; identical retry observes retained state.' },
+    'event-id': { strings: [], positional: 'private-event.json', description: 'Validate an owner-only local event against this API release and report its byte hash and stable run UUID without opening storage or executing.' },
+    event: { strings: ['event-sha256'], positional: 'private-event.json', required: ['event-sha256'], description: 'Execute one explicitly pinned owner-only local event as a headless API job. The release/source/message ID fixes its run UUID; identical redelivery only observes retained state. No listener, scheduler, polling, retry, resume or approval is installed.' },
+    'event-inbox': { strings: ['inbox'], positional: 'private-event.json', required: ['inbox'], description: 'Admit one owner-only local event into a private durable inbox for later delivery; validates exactly like event-id and never opens workflow storage. Re-queuing identical bytes is idempotent.' },
+    scheduler: { strings: ['inbox', 'event-timeout-ms', 'interval-seconds'], required: ['inbox'], description: 'Drain the private durable inbox by spawning the exact event command in separate bounded child processes, then exit (scale to zero). waiting/executing runs are re-observed on later passes until terminal; conflicts and invalid envelopes stop retrying for operator inspection. Optional --interval-seconds keeps an explicitly started local polling loop. The scheduler never opens storage itself, resumes a run or decides an approval.' },
+    show: { strings: [], positional: 'run-uuid', description: 'Read the retained receipt and checkpoint guard; never resume.' },
+    events: { strings: [], positional: 'run-uuid', description: 'Read metadata-only retained journal events; never replay.' },
+    usage: { strings: ['from', 'before', 'group-by'], positional: 'run-uuid', description: 'Report retained model usage and coverage; optional paired UTC-millisecond window and opt-in provider/provider-model grouping, not a provider bill.' },
+    export: { strings: ['output'], positional: 'run-uuid', required: ['output'], booleans: ['include-private', 'overwrite'], description: 'Write read-only evidence JSON; private payloads and replacing an existing file are separate explicit choices.' },
+    cancel: { strings: ['request-id'], positional: 'run-uuid', required: ['request-id'], description: 'Submit durable cancellation with its retained UUID; no rollback or proof that an external provider stopped.' },
+    approvals: { strings: ['after', 'limit'], booleans: ['page'], required: ['page'], description: 'Read the exact-release approval inbox; follow nextCursor even on empty pages. No decision authority is granted.' },
+    notify: { strings: ['notifications-file'], positional: 'operation.json', description: 'Use a strict notifications.* operation; explicit send requires reviewed startup configuration. History needs no destination configuration.' },
+    step: { strings: ['request-id', 'checkpoint-sha256', 'breakpoints-file'], positional: 'run-uuid', required: ['request-id', 'checkpoint-sha256'], description: 'Execute at most one evaluator transition from the reviewed checkpoint; loop bookkeeping may record multiple results.' },
+    continue: { strings: ['request-id', 'checkpoint-sha256', 'breakpoints-file'], positional: 'run-uuid', required: ['request-id', 'checkpoint-sha256'], description: 'Execute from a safe checkpoint until a wait, breakpoint or terminal outcome; never redispatch uncertain intent.' },
+    pause: { strings: ['request-id', 'checkpoint-sha256'], positional: 'run-uuid', required: ['request-id', 'checkpoint-sha256'], description: 'Request cooperative Pause; the current node can finish. Use the running service for an active owner.' },
+    recover: { strings: ['request-id', 'checkpoint-sha256'], positional: 'run-uuid', required: ['request-id', 'checkpoint-sha256'], description: 'Settle one already committed model response; no provider call, downstream execution, lock repair or approval.' },
+    review: { strings: [], positional: 'waiting-run-uuid', description: 'Inspect private saved approval review data; handle output as private.' },
+    decide: { strings: ['attempt', 'action'], positional: 'waiting-run-uuid', required: ['attempt', 'action'], booleans: ['pause-after'], description: 'Commit an explicitly authorized named action for the exact current approval attempt; continuation is real execution.' },
+    'providers-list': { strings: [], description: 'Read retained provider connections; configure before serving.' },
+    'providers-set': { strings: ['file', 'expected-generation'], required: ['file', 'expected-generation'], description: 'Save the reviewed connection JSON with its current generation guard; no provider discovery.' },
+    'credentials-status': { strings: [], positional: 'credential-ref', description: 'Read credential generation/status without displaying its secret.' },
+    'credentials-set': { strings: ['file', 'expected-generation'], positional: 'credential-ref', required: ['file', 'expected-generation'], description: 'Save a secret from an owner-only file with the current generation guard; never put the value in arguments.' },
+    'credentials-clear': { strings: ['expected-generation'], positional: 'credential-ref', required: ['expected-generation'], description: 'Clear an exact active local credential generation, retaining metadata; not provider revocation or secure physical erasure.' },
+};
+export function releaseCommandStrings(command, storage, rateCoordinator) {
+    const spec = releaseAppCommands[command];
+    return [...spec.strings, ...(command === 'serve' && (storage === 'postgres' || rateCoordinator === 'postgres') ? ['rate-coordinator-file'] : []),
+        ...(['run', 'event', 'decide', 'step', 'continue', 'pause', 'recover', 'cancel'].includes(command) ? ['notifications-file'] : []),
+        ...(['info', 'token', 'reviewer-token', 'status', 'request', 'submit', 'observe', 'event-id', 'event-inbox'].includes(command) ? []
+            : [storage === 'postgres' ? 'database-file' : 'data-dir', 'telemetry-file'])];
+}
+export function releaseCommandReference(storage, rateCoordinator) {
+    return 'Command reference (this exact exported app, not the authoring CLI)\n'
+        + 'Run commands from the extracted app directory. <...> values must be supplied; [...] options may be omitted.\n'
+        + (storage === 'postgres' ? 'Every stateful command requires --database-file; info/token/reviewer-token/status/request/submit/observe/event-id/event-inbox never open a database.\n'
+            : 'Use --data-dir for dedicated private persistent SQLite state; omission uses .jevable beside app.mjs.\n')
+        + 'For commands that accept --telemetry-file, export is opt-in and never reconstructs observations from history.\n\n'
+        + (storage === 'postgres' || rateCoordinator === 'postgres' ? 'serve may attach to a protected PostgreSQL shared-quota file with --rate-coordinator-file; requires initialize:false and a pre-provisioned scope/policy. Never combine with --rate-limits-file. The serving app cannot initialize/reset quota, and closes its coordinator after HTTP drain. No discovery/reconnect/retry/refund/fallback; quota is independent of workflow storage.\n\n'
+            : 'The default SQLite workflow bundle imports no PostgreSQL driver and does not accept --rate-coordinator-file. Explicit optional SQLite shared-quota packaging is a separate runtime hash; do not substitute PostgreSQL workflow storage.\n\n')
+        + (storage === 'sqlite' && rateCoordinator === 'postgres' ? 'This explicitly selected optional bundle keeps the SQLite workflow journal and embeds a PostgreSQL driver only for HTTP quotas. No --database-file or PostgreSQL workflow storage. Without --rate-coordinator-file no quota connection is opened; direct jobs need no quota server.\n\n' : '')
+        + `Output limits: ${CLI_OUTPUT_LIMITS.stdoutBytes} UTF-8 bytes per complete stdout response, ${CLI_OUTPUT_LIMITS.stderrBytes} per stderr write, ${CLI_OUTPUT_LIMITS.pendingBytes} pending bytes. No JSON truncation.\n`
+        + 'Exit5 also means output is not confirmed complete. Inspect original retained run/request/artifact identities; never automatically redispatch, overwrite or invent a replacement ID. Native writer completion is not consumer storage/processing proof.\n\n'
+        + 'API-only workflows require --trigger-mode api on check/run, or triggerMode: "api" on release.check/runs.start JSON.\n'
+        + 'The entry must declare api. Omission retains manual/chat behavior; it does not select api automatically.\n'
+        + 'event-id/event consume a private, versioned local event pinned to this exact release and select api explicitly. event requires the reviewed SHA-256 from event-id. A host scheduler may invoke one event job; local file authority is not sender authentication.\n'
+        + 'event-inbox/scheduler add an operator-owned durable local inbox and a drain-once scheduler (explicitly started infrastructure, not a required Jevable service): entries replay under their pinned identity, waits are only re-observed, and no approval or resume is ever automatic.\n'
+        + 'This execution contract does not create a webhook, schedule, public ingress or anonymous endpoint. Configure service authentication independently.\n\n'
+        + Object.entries(releaseAppCommands).map(([name, spec]) => {
+            const required = new Set([...spec.required ?? [], ...(storage === 'postgres' && !['info', 'token', 'reviewer-token', 'status', 'request', 'submit', 'observe', 'event-id', 'event-inbox'].includes(name) ? ['database-file'] : [])]);
+            const flags = [...releaseCommandStrings(name, storage, rateCoordinator).map(flag => ({ flag, value: ' <value>' })),
+                ...(spec.booleans ?? []).map(flag => ({ flag, value: '' }))]
+                .map(({ flag, value }) => required.has(flag) ? `--${flag}${value}` : `[--${flag}${value}]`);
+            return `node app.mjs ${name}${spec.positional ? ` <${spec.positional}>` : ''}${flags.length ? ' ' + flags.join(' ') : ''}\n  ${spec.description}\n`;
+        }).join('\n') + '\nEnd command reference\n';
+}
+import { CLI_OUTPUT_LIMITS } from "../process/cli-output.js";

@@ -1,0 +1,13 @@
+{
+  "id": "settings-default",
+  "provider": "my-provider",
+  "protocol": "openai-compatible",
+  "endpoint": "https://your-provider.example/v1",
+  "allowedModels": ["your-model-id"],
+  "authentication": { "kind": "bearer", "credentialRef": "models/main" },
+  "tokenParameter": "max_tokens",
+  "maxResponseBytes": 2000000,
+  "maxRequestBytes": 1000000,
+  "maxStreamEvents": 10000,
+  "maxTimeoutSeconds": 120
+}
