@@ -1,12 +1,25 @@
 # Jevable Skill
 
-**Describe the work. Get a workflow app you can run.**
+English | [中文](README.zh-CN.md)
 
-Turn support triage, lead qualification, content review and approvals into a repeatable app. Your agent builds it; you review and test it; the **Jevable workflow runtime** runs it independently afterward.
+**Describe a process. Let your agent build a workflow app you can inspect, test, and run independently.**
 
-**Build by talking · Test beside your chat · Ship a runnable app · Trace every run**
+Turn repeatable requests, reviews, and routing into explicit steps, branches, and human approvals. Your agent helps build and revise the workflow. You review and test it. The Jevable workflow runtime executes it and retains each run’s results.
 
-YAML defines the workflow. HTML lets you inspect it. The deliverable is an entire runnable application with an execution engine, durable state, approvals and operational controls—not just those two files.
+- **Inspect before executing.** Review the graph, proposed changes, and test results. Opening a preview does not run or approve anything.
+- **Wait for a person when needed.** Explicit approval steps retain waiting states and decision history.
+- **Deliver a runnable app.** Export a ZIP containing the workflow and its execution engine—not just YAML or a diagram. The exported app does not need the original conversation or authoring skill.
+- **Give each step a clear job.** Use Rules for known logic, Decision (Jev) for typed judgment, and LLM steps for writing.
+
+### Start with a model-free example
+
+[Request review](examples/request-review.yaml) demonstrates two paths: routine requests return their message directly; requests marked for review wait for human approval. Neither path calls a model, sends a message, or changes an external account.
+
+If you have obtained and verified a trusted skill ZIP, follow the [installation guide](references/skill-package.md). Running this example requires Node.js 22.19+, without Docker, `npm install`, or a model account. There is no public installer or download yet.
+
+> Current version: `0.1.0-alpha.1`. This is an early implementation, not a production-ready release. Real hosted model providers remain unverified; custom code nodes validate but do not execute. AI steps require provider configuration and may incur charges. Licensing and distribution terms are not finalized. Public source availability is not permission for free commercial use or redistribution.
+
+Step-by-step commands, expected exit codes and what the example does **not** demonstrate: [request-review runbook](docs/request-review-demo.md).
 
 ## Quick start — one prompt
 
@@ -16,13 +29,15 @@ Paste this into your agent (any agent that can use skills and run Node.js):
 
 Your agent clones the repository (it ships prebuilt output — no build step), installs the skill, runs the example, and reports the **saved run**. Requires **git and Node.js 22.19+** only. Packaging the same skill as a verified ZIP and archive inspection remain available in the [skill package guide](references/skill-package.md), and your agent can walk them for you.
 
+> **Known issue (`0.1.0-alpha.1`):** in a plain clone, `node bin/jevable.mjs` currently stops with `ERR_MODULE_NOT_FOUND` (for example, package `zod`) because the checkout's `dist/` output expects runtime dependencies that are not committed. The "no `npm install`" path applies to an exported skill ZIP, whose bundled CLI runs without `node_modules`. See the [runbook](docs/request-review-demo.md#which-cli-to-use).
+
 ### Try a real branch and approval wait — also a prompt
 
-The bundled [Request review workflow](examples/request-review.yaml) has five steps. A Rule sends a routine request straight to Output; a sensitive request pauses at Human Approval. Neither path calls a model or changes an account. Ask your agent:
+The bundled [Request review workflow](examples/request-review.yaml) has five steps. A Rule sends a routine request straight to Output; a request whose input sets `needsReview: true` pauses at Human Approval. The Rule reads that boolean; it does not detect sensitive content. Neither path calls a model or changes an account. Ask your agent:
 
 > Using the Jevable skill, run both shipped request-review inputs into one private state directory, then show me the waiting approval and its run IDs. Do not approve it.
 
-The first run completes with the onboarding-guide message. The second reports **waiting** (exit code 3), not success or failure: its billing-account message has not been acted on. Save the returned run IDs; do not approve the request merely to finish the example. Each run without its original retained ID starts a new run. [Approval safety and review](references/approvals.md).
+The first run completes with the onboarding-guide message. The second reports **waiting** (exit code 3), not success or failure: its billing-account message has not been acted on. Save the returned run IDs; do not approve the request merely to finish the example. Each run without its original retained ID starts a new run. [Approval safety and review](references/approvals.md) · [Request-review runbook](docs/request-review-demo.md).
 
 ## Start with an idea — a prompt
 
