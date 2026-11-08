@@ -1,0 +1,305 @@
+{
+  "description": "Public baseline for tests/postgres-caller.spec.ts: every caller/reviewer domain case above the \"Delegated admission boundaries\" marker, with its it.each parameters and minimum expect() count. Authored in PR #1 (2026-11-08) as an explicit public contract that replaces a private qualification snapshot; it is NOT a copy or reconstruction of that snapshot. Update it only when intentionally changing a pre-boundary case.",
+  "boundaryMarker": "/** Delegated admission boundaries:",
+  "cases": [
+    {
+      "describe": "PostgreSQL caller SDK model/control boundaries (journal/model doubles, not actual SQL/providers)",
+      "title": "reads only a retained response (available=%s) and never redispatches or executes downstream",
+      "each": "[true, false]",
+      "expects": 14
+    },
+    {
+      "describe": "PostgreSQL caller SDK model/control boundaries (journal/model doubles, not actual SQL/providers)",
+      "title": "reauthenticates %s after awaited retained-response recovery before admission or settlement",
+      "each": "['revoked', 'expired']",
+      "expects": 6
+    },
+    {
+      "describe": "PostgreSQL caller SDK model/control boundaries (journal/model doubles, not actual SQL/providers)",
+      "title": "admits an in-flight pause and observes the active original UUID without reacquiring a worker",
+      "expects": 8
+    },
+    {
+      "describe": "PostgreSQL caller SDK model/control boundaries (journal/model doubles, not actual SQL/providers)",
+      "title": "rechecks %s after awaited provider admission, before a control write or dispatch",
+      "each": "['revoked', 'expired']",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL caller SDK model/control boundaries (journal/model doubles, not actual SQL/providers)",
+      "title": "leaves a double-simulated lost admission acknowledgment pending; original UUID never executes it on retry",
+      "expects": 4
+    },
+    {
+      "describe": "PostgreSQL private caller control writer (journal double, not SQL or SDK execution)",
+      "title": "commits exact attributed intent with grant/run/time pins and retains read-only retry without execution",
+      "expects": 6
+    },
+    {
+      "describe": "PostgreSQL private caller control writer (journal double, not SQL or SDK execution)",
+      "title": "refuses missing/substituted %s writer guard before any journal commit",
+      "each": "['absent', 'not-before', 'deadline', 'grant', 'run', 'version'] as const",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL private caller control writer (journal double, not SQL or SDK execution)",
+      "title": "rejects an action/batch UUID substitution before writing and on retained replay",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL private caller control writer (journal double, not SQL or SDK execution)",
+      "title": "refuses %s after planning, without a control record or journal event",
+      "each": "['revoked', 'expired'] as const",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL private caller control writer (journal double, not SQL or SDK execution)",
+      "title": "observes a double-simulated committed admission after acknowledgment loss, never reconstructing execution",
+      "expects": 4
+    },
+    {
+      "describe": "PostgreSQL private caller control writer (journal double, not SQL or SDK execution)",
+      "title": "keeps delegated admission out of the public owner control input",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "retains authenticated %s cancellation causality across observation-only retries",
+      "each": "['paused', 'waiting'] as const",
+      "expects": 8
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "retains the first admission context after a lost journal COMMIT acknowledgement without retry settlement",
+      "expects": 5
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "cancels its own %s run with exact grant/run/time conditions and metadata-only receipt",
+      "each": "['paused', 'waiting'] as const",
+      "expects": 16
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "filters other grants, owner runs and missing IDs before private reads or a trusted hook",
+      "expects": 4
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "refuses caller-supplied %s and missing UUID without mutation",
+      "each": "['actor', 'delegation', 'scope', 'at', 'release', 'authority', 'traceParent', 'cause', 'unknown']",
+      "expects": 4
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "captures request and release pins before a trusted asynchronous hook",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "refuses a backward admission clock before a historically invalid write",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "reauthenticates %s after an awaited hook with no run write",
+      "each": "['new-revoked', 'new-expired', 'retry-revoked', 'retry-expired']",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "refuses %s after planning but at the exact guarded commit",
+      "each": "['revoked', 'expired', 'checkpoint-changed']",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "observes an uncertain committed request without abort or settlement, including a new runtime object",
+      "expects": 8
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "does not adopt an owner cancellation or accept a changed request, terminal run or used batch UUID",
+      "expects": 4
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "requires exact action UUID, deadline and grant/run guards at the writer rather than accepting a token lookup",
+      "expects": 4
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "signals an active model only once, observes an unsettled retry, and lets already admitted settlement finish",
+      "expects": 9
+    },
+    {
+      "describe": "PostgreSQL SDK caller cancellation (journal double, not actual SQL)",
+      "title": "refuses cancellation %s corruption before receipt or effects",
+      "each": "['actor', 'grant', 'permission', 'release', 'deadline', 'before-creation', 'event-kind', 'event-missing', 'batch'] as const",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "invokes trusted caller contexts only after scoped authentication and gives an isolated release pin",
+      "expects": 6
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "reauthenticates %s after an awaited trusted caller hook without run mutation",
+      "each": "['new', 'retry', 'read'] as const",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "refuses non-function caller context before starting or inspecting a run",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "executes an exact release with guarded atomic attribution; returns only metadata then explicit own completed output",
+      "expects": 8
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "retry observes mutable current state, never replays a stale creation write or resumes execution",
+      "expects": 5
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "start-only and read-only permissions never substitute for one another or another grant ownership",
+      "expects": 4
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "filters foreign/owner runs before private reads, including foreign creation collisions",
+      "expects": 5
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "refuses client %s and missing retained UUID without mutation",
+      "each": "['actor', 'caller', 'release', 'project', 'yaml', 'test', 'authority']",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "refuses %s start/read/retry without checkpoint changes",
+      "each": "['expired', 'revoked', 'wrong-secret', 'owner-token'] as const",
+      "expects": 5
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "refuses %s after delayed model admission before planning/writing",
+      "each": "['revoked', 'expired'] as const",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "guard refuses %s after planning and before creation commit",
+      "each": "['revoked', 'expired'] as const",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "scopes in-flight identity reservations and does not expose another caller busy state",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "detaches input/options before awaited grant reads and rechecks expiry after slow private replay",
+      "expects": 4
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "retains one creation after double-simulated lost acknowledgment; public retry observes it without write replay",
+      "expects": 4
+    },
+    {
+      "describe": "PostgreSQL SDK caller domain integration (journal double)",
+      "title": "denies reviewer principals without loading caller source or a private target",
+      "expects": 5
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "authenticates before propagation and rechecks receipt authorization after a trusted hook awaits",
+      "expects": 4
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "commits an unsampled %s segment in the same guarded journal batch",
+      "each": "['approve', 'reject'] as const",
+      "expects": 7
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "refuses retained reviewer trace %s corruption at verified SQL-adapter reads (domain double)",
+      "each": "['missing-event', 'missing-record', 'trace', 'operation', 'timestamp', 'previous', 'parent', 'order', 'duplicate'] as const",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "retains guarded %s attribution in state and event; returns metadata only",
+      "each": "['approve', 'reject'] as const",
+      "expects": 7
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "observes exact retries without writing/resuming; changed options conflict and foreign requests stay isolated",
+      "expects": 7
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "continues an approved run exactly once when pauseAfter is false",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "refuses client %s without target reads or mutation",
+      "each": "['actor', 'runId', 'attemptId', 'revision', 'scope', 'authority']",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "refuses %s before any private run read",
+      "each": "['caller', 'owner', 'wrong-secret', 'revoked', 'expired', 'disallowed'] as const",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "final writer guard refuses %s after action planning without a decision write",
+      "each": "['revoked', 'expired', 'changed-run'] as const",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "refuses expiry after a slow private replay, without disclosing or changing retained state",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "recovers a double-simulated lost acknowledgment without another journal write or continuation",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "keeps expired/revoked historical decisions inspectable without restoring delegated authority",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "refuses %s retained attribution corruption without repairing or executing",
+      "each": "['scope', 'deadline', 'event', 'missing-grant', 'batch-request'] as const",
+      "expects": 2
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "refuses delegated decision request substitution at the checkpoint writer before any journal mutation",
+      "expects": 3
+    },
+    {
+      "describe": "PostgreSQL reviewer SDK domain integration (NOT actual SQL)",
+      "title": "refuses a %s delegated decision admission condition before mutation",
+      "each": "['missing', 'grant', 'run', 'version', 'time', 'deadline'] as const",
+      "expects": 3
+    }
+  ]
+}
