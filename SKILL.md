@@ -7,7 +7,7 @@ description: Build, revise and preview Jevable workflow applications with typed 
 
 Build an entire runnable workflow application, not merely YAML or inspection HTML. The agent authors and reviews; the **Jevable workflow runtime** executes, persists approvals/results and emits telemetry independently afterward.
 
-Use `node <skill-directory>/bin/jevable.mjs`. Local/offline use needs neither Docker nor an authoring server. Never fill a missing capability by attaching to Jarness, a desktop/harness service, their credentials or data. No parent-checkout imports, workspace links, automatic source synchronization or harness mounts. Future desktop integrations consume this core, never the reverse; deployed workflow containers do not need the skill or agent.
+Use `node <skill-directory>/bin/jevable.mjs`. Local/offline use needs neither Docker nor an authoring server. If the skill directory is a git clone, run `npm ci --omit=dev` there once before first use: runtime dependencies are not committed, but prebuilt `dist/` is, so there is no build step. An extracted skill ZIP already bundles its dependencies. If the CLI reports a missing runtime dependency, that install is the fix. See [installation](references/skill-package.md#install-from-a-git-clone). Do not substitute another package or installation. Never fill a missing capability by attaching to Jarness, a desktop/harness service, their credentials or data. No parent-checkout imports, workspace links, automatic source synchronization or harness mounts. Future desktop integrations consume this core, never the reverse; deployed workflow containers do not need the skill or agent.
 
 ## Choose the actual installed capability
 

@@ -1,6 +1,6 @@
 # Request review — verifiable runbook
 
-[README](../README.md) · [中文 README](../README.zh-CN.md)
+[README](../README.md) · [繁體中文 README](../README.zh-TW.md)
 
 This runbook walks the model-free [Request review](../examples/request-review.yaml) example end to end: inspect the graph, run a routine request, run a request marked for review, inspect the waiting approval, optionally approve it, and read the same run back.
 
@@ -18,11 +18,19 @@ Input files:
 | [`examples/request-review-routine-input.json`](../examples/request-review-routine-input.json) | `{"message":"Please send the onboarding guide.","needsReview":false}` | `start → route (false) → directResult`, status `completed`, exit 0 |
 | [`examples/request-review-sensitive-input.json`](../examples/request-review-sensitive-input.json) | `{"message":"Please change my billing account.","needsReview":true}` | `start → route (true) → review`, status `waiting`, exit 3 |
 
-## Which CLI to use
+## Install and choose the CLI
 
-Run the commands from the root of an **extracted, verified skill ZIP** (the `jevable/` directory; see the [skill package guide](../references/skill-package.md)). Its bundled `bin/jevable.mjs` runs with Node.js 22.19+ and no `node_modules`.
+**Primary path: a git clone with its runtime dependencies.** You need git, Node.js 22.19+ and npm, plus npm registry access for the one-time install. The clone ships prebuilt `dist/`, so there is no build step.
 
-In a plain source checkout of `0.1.0-alpha.1`, `node bin/jevable.mjs` currently fails with `ERR_MODULE_NOT_FOUND` until the runtime dependencies listed in `package.json` are installed. Use the extracted skill ZIP, or install those dependencies in a separate copy, rather than relying on the clone alone.
+```sh
+git clone https://github.com/somethingwentwell/jevable-skill
+cd jevable-skill
+npm ci --omit=dev
+```
+
+Run every command below from the checkout root. If you skip `npm ci --omit=dev`, `bin/jevable.mjs` stops with a message naming the missing package and the install command.
+
+**Alternative: an extracted skill ZIP.** Run the same commands from the root of an extracted, verified skill ZIP (its `jevable/` directory). The bundled CLI there needs no `npm install`. See the [installation guide](../references/skill-package.md).
 
 Use an absolute path for `bin/jevable.mjs` when your agent works in another directory. Confirm the installed grammar before relying on any command:
 

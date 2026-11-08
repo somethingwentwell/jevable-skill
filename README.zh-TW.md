@@ -1,6 +1,6 @@
 # Jevable Skill
 
-[English](README.md) | 中文
+[English](README.md) | 繁體中文
 
 **描述工作流程，讓 Agent 做成可檢視、可測試、能獨立執行的 App。**
 
@@ -15,7 +15,7 @@
 
 [Request review 範例](examples/request-review.yaml) 展示兩條路徑：一般請求直接輸出；標記為需要審核的請求，停下等待人工批准。兩條路徑都不呼叫模型，也不寄送訊息或修改外部帳戶。
 
-已取得並驗證可信 skill ZIP 的使用者，可依[安裝指南](references/skill-package.md)操作。此範例需要 Node.js 22.19+，不需要 Docker、`npm install` 或模型帳戶。目前尚無公開安裝／下載入口。
+安裝方式：clone 這個儲存庫，並執行一次 `npm ci --omit=dev` 安裝執行期相依套件，詳見[安裝指南](references/skill-package.md#install-from-a-git-clone)。儲存庫已附預先建置的輸出，不需要建置步驟。之後執行此範例需要 Node.js 22.19+ 與 npm，不需要 Docker 或模型帳戶。目前尚無封裝好的安裝程式。從 clone 匯出的自含 skill ZIP 是另一種選擇，不需要 `npm install` 即可執行。
 
 > 目前版本為 `0.1.0-alpha.1`，尚非正式生產環境版本。真實託管模型服務仍待驗證；自訂程式碼節點目前可驗證但不執行。AI 節點可能產生供應商費用。授權與散布條款尚未定案，公開原始碼不代表允許免費商用或自由再散布。
 
@@ -27,11 +27,9 @@
 
 把這段提示貼給你的 Agent（任何能使用 skill 並執行 Node.js 的 Agent）：
 
-> 從 Jevable skill 的公開儲存庫安裝：clone https://github.com/somethingwentwell/jevable-skill，從該 checkout 把 skill 安裝到你核准的 skill 位置，再用這個 skill 執行內附的 echo 範例 — 不要 npm install、不要 Docker、不要模型帳戶。告訴我 run ID 與保留下來的結果。
+> 從 Jevable skill 的公開儲存庫安裝：把 https://github.com/somethingwentwell/jevable-skill clone 到你核准的 skill 位置，在該 checkout 中執行 `npm ci --omit=dev` 安裝執行期相依套件，再用這個 skill 執行內附的 echo 範例 — 不需要建置步驟、不要 Docker、不要模型帳戶。告訴我 run ID 與保留下來的結果。
 
-Agent 會 clone 儲存庫、安裝 skill、執行範例，並回報**已保存的執行紀錄**。另一種方式是把同一個 skill 打包成經驗證的 ZIP 並檢查封存內容，詳見 [skill 封裝指南](references/skill-package.md)。
-
-> **已知問題（`0.1.0-alpha.1`）**：在單純 clone 下來的 checkout 中，`node bin/jevable.mjs` 目前會因 `ERR_MODULE_NOT_FOUND`（例如找不到 `zod` 套件）而停止，因為 checkout 的 `dist/` 需要未隨儲存庫提交的執行期相依套件。「不需要 `npm install`」適用於匯出的 skill ZIP，其內附的 CLI 不需要 `node_modules` 即可執行。詳見[操作手冊](docs/request-review-demo.md#which-cli-to-use)。
+Agent 會 clone 儲存庫，並從 npm registry 安裝 `package-lock.json` 鎖定的執行期相依套件。儲存庫已附預先建置的 `dist/`，因此不需要建置步驟。接著 Agent 會執行範例，並回報**已保存的執行紀錄**。需要 **git、Node.js 22.19+ 與 npm**，安裝那一次也需要能連上 npm registry。若缺少相依套件，`bin/jevable.mjs` 會指出缺少的套件並顯示安裝指令。若要把 skill 交給沒有 npm 的 Agent，可以從 clone 匯出自含的 skill ZIP，詳見 [skill 封裝指南](references/skill-package.md)。
 
 ### 試試真實的分支與審批等待 — 同樣一句提示
 

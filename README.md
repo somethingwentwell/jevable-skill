@@ -1,6 +1,6 @@
 # Jevable Skill
 
-English | [中文](README.zh-CN.md)
+English | [繁體中文](README.zh-TW.md)
 
 **Describe a process. Let your agent build a workflow app you can inspect, test, and run independently.**
 
@@ -15,7 +15,7 @@ Turn repeatable requests, reviews, and routing into explicit steps, branches, an
 
 [Request review](examples/request-review.yaml) demonstrates two paths: routine requests return their message directly; requests marked for review wait for human approval. Neither path calls a model, sends a message, or changes an external account.
 
-If you have obtained and verified a trusted skill ZIP, follow the [installation guide](references/skill-package.md). Running this example requires Node.js 22.19+, without Docker, `npm install`, or a model account. There is no public installer or download yet.
+To install, clone this repository and install its runtime dependencies once with `npm ci --omit=dev`; see the [installation guide](references/skill-package.md#install-from-a-git-clone). The checkout ships prebuilt output, so there is no build step. Running this example then needs Node.js 22.19+ and npm, but no Docker or model account. There is no packaged installer yet. A self-contained skill ZIP exported from a clone is an alternative that runs without `npm install`.
 
 > Current version: `0.1.0-alpha.1`. This is an early implementation, not a production-ready release. Real hosted model providers remain unverified; custom code nodes validate but do not execute. AI steps require provider configuration and may incur charges. Licensing and distribution terms are not finalized. Public source availability is not permission for free commercial use or redistribution.
 
@@ -25,11 +25,9 @@ Step-by-step commands, expected exit codes and what the example does **not** dem
 
 Paste this into your agent (any agent that can use skills and run Node.js):
 
-> Install the Jevable skill from its public repository: clone https://github.com/somethingwentwell/jevable-skill, install the skill from that checkout into your approved skill location, then use the skill to run the shipped echo example — no npm install, no Docker, no model account. Show me the run ID and its retained result.
+> Install the Jevable skill from its public repository: clone https://github.com/somethingwentwell/jevable-skill into your approved skill location, run `npm ci --omit=dev` in that checkout to install its runtime dependencies, then use the skill to run the shipped echo example — no build step, no Docker, no model account. Show me the run ID and its retained result.
 
-Your agent clones the repository (it ships prebuilt output — no build step), installs the skill, runs the example, and reports the **saved run**. Requires **git and Node.js 22.19+** only. Packaging the same skill as a verified ZIP and archive inspection remain available in the [skill package guide](references/skill-package.md), and your agent can walk them for you.
-
-> **Known issue (`0.1.0-alpha.1`):** in a plain clone, `node bin/jevable.mjs` currently stops with `ERR_MODULE_NOT_FOUND` (for example, package `zod`) because the checkout's `dist/` output expects runtime dependencies that are not committed. The "no `npm install`" path applies to an exported skill ZIP, whose bundled CLI runs without `node_modules`. See the [runbook](docs/request-review-demo.md#which-cli-to-use).
+Your agent clones the repository and installs the runtime dependencies pinned in `package-lock.json` from the npm registry. Because the repository ships prebuilt `dist/` output, there is no build step. The agent then runs the example and reports the **saved run**. This requires **git, Node.js 22.19+ and npm**, plus network access to the npm registry for that one install. If dependencies are missing, `bin/jevable.mjs` says so and prints the install command. To hand the skill to an agent without npm, export a self-contained skill ZIP from the clone; see the [skill package guide](references/skill-package.md).
 
 ### Try a real branch and approval wait — also a prompt
 

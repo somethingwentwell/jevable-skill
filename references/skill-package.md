@@ -1,4 +1,26 @@
-# Deliver the standalone agent skill
+# Install and deliver the standalone agent skill
+
+## Install from a git clone
+
+This is the primary supported way to install the skill. You need git, Node.js 22.19+ and npm, plus network access to the npm registry for the dependency install.
+
+```sh
+git clone https://github.com/somethingwentwell/jevable-skill <approved-skill-directory>/jevable
+cd <approved-skill-directory>/jevable
+npm ci --omit=dev
+node bin/jevable.mjs capabilities
+node bin/jevable.mjs run examples/echo.yaml --input examples/echo-input.json --data-dir /your/private/workflow-state
+```
+
+- The repository includes prebuilt `dist/` output, so there is no build step. `npm ci --omit=dev` installs only the runtime dependencies pinned in `package-lock.json` into `node_modules/` inside the checkout. It does not install anything globally, start a service or run workflows.
+- Without that step, `node bin/jevable.mjs` stops with a message naming the missing package and the install command.
+- Clone directly into the agent's user-approved skill directory, or clone elsewhere and place the checkout there yourself. Do not overwrite an existing installation. `SKILL.md` sits at the checkout root.
+- Install from this repository. Do not substitute `npm install @jevable/core`: the npm registry package of that name is published from a different repository and is not this checkout.
+- Rebuilding `dist/` is only needed after changing `src/`. It needs the full development dependencies: `npm ci && npm run build`. See [development](development.md).
+
+A clone and an exported skill ZIP carry the same skill instructions, examples and CLI commands. A ZIP bundles the CLI with its dependencies, so it runs without `npm install`. That is useful for handing the skill to an agent without npm or network access.
+
+## Export a self-contained skill ZIP
 
 `skill export` creates the agent-facing distribution: instructions, references, examples, editable Archify diagrams/screenshots, notices and the bundled Jevable CLI. It is not a workflow release, image or developer checkout.
 
