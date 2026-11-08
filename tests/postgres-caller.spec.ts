@@ -979,7 +979,13 @@ describe('delegated pre-live source admission boundaries (journal/model doubles,
     } finally { await f.owner.close(); await wire.close() }
   })
   it('preserves every previous caller/reviewer domain case and assertion', async () => {
-    const before = await readFile(new URL('../qualification/runner-snapshots/delegated-prelive/postgres-caller.spec.ts.before-delegated-prelive.txt', import.meta.url), 'utf8')
+    // The baseline is a private qualification snapshot that is not in the public repository. Fail clearly
+    // rather than skip: this guard cannot run until that snapshot is published.
+    const snapshot = new URL('../qualification/runner-snapshots/delegated-prelive/postgres-caller.spec.ts.before-delegated-prelive.txt', import.meta.url)
+    const before = await readFile(snapshot, 'utf8').catch(error => {
+      if (error?.code !== 'ENOENT') throw error
+      throw Error(`Missing private qualification snapshot ${snapshot.pathname}: this baseline guard needs it and it is not in the public repository`)
+    })
     const after = await readFile(new URL('./postgres-caller.spec.ts', import.meta.url), 'utf8'), boundary = after.indexOf('/** Delegated admission boundaries:')
     expect(boundary).toBeGreaterThan(0)
     expect(after.slice(0, boundary).replace(
