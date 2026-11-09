@@ -17,7 +17,7 @@
 
 安裝方式：clone 這個儲存庫，並執行一次 `npm ci --omit=dev` 安裝執行期相依套件，詳見[安裝指南](references/skill-package.md#install-from-a-git-clone)。儲存庫已附預先建置的輸出，不需要建置步驟。之後執行此範例需要 Node.js 22.19+ 與 npm，不需要 Docker 或模型帳戶。目前尚無封裝好的安裝程式。從 clone 匯出的自含 skill ZIP 是另一種選擇，不需要 `npm install` 即可執行。
 
-> 目前版本為 `0.1.0-alpha.1`，尚非正式生產環境版本。真實託管模型服務仍待驗證；自訂程式碼節點目前可驗證但不執行。AI 節點可能產生供應商費用。授權與散布條款尚未定案，公開原始碼不代表允許免費商用或自由再散布。
+> 目前版本為 `0.1.0-alpha.1`，尚非正式生產環境版本。真實託管模型服務仍待驗證；自訂程式碼節點目前可驗證但不執行。AI 節點可能產生供應商費用。已採用 MIT 授權（見 `LICENSE`）；`notices/` 內第三方聲明仍適用。上方 alpha 產品限制不變。
 
 逐步指令、預期的結束碼，以及這個範例**沒有**展示的內容，請見 [Request review 操作手冊（英文）](docs/request-review-demo.md)。
 
@@ -60,7 +60,7 @@ Agent 會 clone 儲存庫，並從 npm registry 安裝 `package-lock.json` 鎖�
 - 自訂程式碼節點可驗證但不會執行。
 - 真實託管模型服務尚未驗證；AI 節點需要你設定供應商，且可能產生費用。
 - 瀏覽器驗收只涵蓋英文 README 中明確記錄的流程。
-- 授權與散布條款尚未定案（`package.json` 標示為 `UNLICENSED`）。公開原始碼不代表允許免費商用或自由再散布。
+- 授權為 MIT（見 `LICENSE`；`package.json` 標示為 `MIT`）。`notices/` 內第三方聲明仍適用。
 
 依賴某項功能之前，請 Agent 回報這個安裝實際具備的範圍（`capabilities`）以及指令的實際語法（`help <command> --json`）。
 

@@ -1,6 +1,7 @@
 /** Curated public resources only. Never sweep a checkout, skill directory or user state. */
 export const AGENT_SKILL_RESOURCES = Object.freeze([
     ".env.example",
+    "LICENSE",
     "README.md",
     "README.zh-TW.md",
     "SKILL.md",

@@ -2,7 +2,7 @@
   "name": "@jevable/core",
   "version": "0.1.0-alpha.1",
   "description": "Jevable workflow compiler, runtime SDK and agent CLI",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=22.19.0"

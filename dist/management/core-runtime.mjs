@@ -99465,6 +99465,7 @@ var init_skill_resources = __esm({
     "use strict";
     AGENT_SKILL_RESOURCES = Object.freeze([
       ".env.example",
+      "LICENSE",
       "README.md",
       "README.zh-TW.md",
       "SKILL.md",

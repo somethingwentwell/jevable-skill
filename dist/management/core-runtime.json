@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "storage": "management",
-  "sha256": "4017e41798851a76085df31c0ce544e25987817d9b21e77a0ac4bf06bea2c7eb",
-  "bytes": 5712037,
+  "sha256": "86de56ba9583665e4de63f462661c1d4ba31ebafd4071b094f4143645c880b97",
+  "bytes": 5712054,
   "coreVersion": "0.1.0-alpha.1",
   "dependencies": [
     {
