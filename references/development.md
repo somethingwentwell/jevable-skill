@@ -35,6 +35,25 @@ node bin/jevable.mjs run examples/echo.yaml --input examples/echo-input.json --d
 npm run test:package
 ```
 
+**Public-checkout test coverage.** Every test file loads and runs in a public clone; none is skipped or excluded. Five test-support scripts were missing from the public repository, and no originals were available, so they are **reconstructions** written from the tests' expectations. Each file's header says so:
+
+- `scripts/tls-fixture.mjs` (+ `tls-fixture.d.mts`): one self-signed P-256 certificate per call that is also its own trust anchor, plus a free-port helper. It needs the OpenSSL CLI with `req -addext`.
+- `scripts/check-telemetry-package.mjs` and `scripts/check-postgres-telemetry.mjs`: minimal independent OTLP protobuf decoders (`fields`, `metricSums`, `logRecords`, `resourceAttributes`, `traceRecords`).
+- `scripts/check-documentation-package.mjs`: local-link checks for an installed package's Markdown and HTML contact sheets; also runnable as `node scripts/check-documentation-package.mjs <package-root>`.
+- `scripts/release-guide-contract.mjs`: parsers for an exported app's `README.txt` telemetry examples and command reference.
+
+They may differ from the private originals. In particular, the originals were probably also standalone package/PostgreSQL check runners; only the functions the tests import are rebuilt. `scripts/standalone-boundary.mjs` (the build-input guard) is likewise a reconstruction that could not be compared with an original.
+
+**Public baseline for the `postgres-caller.spec.ts` preservation guard.** *Preserves every previous caller/reviewer domain case and assertion* used to compare the spec with a private qualification snapshot (`qualification/runner-snapshots/…`) that is not in the public repository. It now checks a public, checked-in contract instead: `tests/fixtures/postgres-caller-domain-cases.json`.
+- **What the contract is:** it was authored in PR #1 as a new explicit baseline. It is **not** a copy or reconstruction of the private snapshot.
+- **What it records:** every one of the 55 caller/reviewer domain cases above the `/** Delegated admission boundaries:` marker, by describe and test title, with its `it.each` parameter list and minimum `expect()` count.
+- **What the guard checks:** using the TypeScript parser (`tests/helpers/spec-cases.ts`), each contracted case must still exist above the marker with the same parameters and no fewer assertions. The delegated suite and its imports must stay in place.
+- **What it catches:** removing, renaming or skipping a case, dropping an `it.each` parameter, or deleting an assertion.
+- **What it no longer checks:** byte-for-byte equality with the old private baseline.
+- **Updating it:** change the contract only when deliberately changing a pre-boundary case, and review that diff.
+
+`tests/provider-trace-fixture.d.ts` (part of the original repository) types the telemetry helpers. The `npm run test:boundary`, `test:standalone` and `test:package` scripts named above are not defined in the public `package.json`.
+
 The package qualification packs this repository, installs the resulting tarball in a fresh temporary directory with production dependencies, and invokes the shipped binary and SDK. It checks that shipped JavaScript has no Jarness/harness/deepseek imports, workspace dependencies or source-tree references. Attribution text is not a dependency. It leaves its isolated directory available for inspection. The HTTPS integration/package checks require an OpenSSL CLI supporting `req -addext` to generate temporary test-only certificates; OpenSSL CLI is not a runtime prerequisite. Fixture private keys stay in temporary directories, not shipped artifacts. Actual image/platform records are pinned to their own runtime hashes and are not refreshed merely because local package tests pass.
 
 The npm distribution also includes [Archify documentation diagrams](../architecture/README.md), editable JSON, screenshot contact sheets and the retained MIT notice. `scripts/check-documentation-package.mjs` checks local links across the installed README, skill instructions and reference guides, plus diagram/contact-sheet assets, and refuses missing or checkout-linked files. Private developer receipts and roadmap files stay in the source checkout; references to `qualification/*.json` in these guides identify those source-checkout records, not installed downloads. File integrity does not qualify browser rendering or workflow testing, and the diagrams' optional remote font stylesheets are not fetched by this check.

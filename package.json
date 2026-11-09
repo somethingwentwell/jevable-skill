@@ -2,7 +2,7 @@
   "name": "@jevable/core",
   "version": "0.1.0-alpha.1",
   "description": "Jevable workflow compiler, runtime SDK and agent CLI",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=22.19.0"
@@ -150,7 +150,7 @@
     "pg-protocol": "1.16.0",
     "yaml": "2.9.0",
     "yauzl": "3.4.0",
-    "zod": "4.4.3"
+    "zod": "4.6.7"
   },
   "optionalDependencies": {
     "pg-cloudflare": "1.4.0"
